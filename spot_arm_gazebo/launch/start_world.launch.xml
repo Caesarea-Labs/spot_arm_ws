@@ -1,0 +1,7 @@
+<?xml version='1.0' ?>
+<launch>
+  <!-- Start the lab and gazebo -->
+  <include file="$(find-pkg-share spot_arm_gazebo)/launch/gazebo.launch.py"/>
+  <!-- Add the socket  -->
+  <include file="$(find-pkg-share spot_arm_gazebo)/launch/gazebo_socket.launch.py"/>
+</launch>

@@ -1,0 +1,286 @@
+<?xml version="1.0"?>
+<robot name="socket">
+    <material name="red">
+      <color rgba="1.0 0.0 0.0 1"/>
+  </material>
+
+  <material name="green_light">
+      <color rgba="0.0 1.0 0.0 1"/>
+  </material>
+
+  <material name="green_dark">
+    <color rgba="0.0 0.5 0.0 1"/>
+  </material>
+
+  <material name="blue">
+      <color rgba="0.0 0.0 1.0 1"/>
+  </material>
+    <material name="blue_light">
+      <color rgba="0.5 0.5 0.5 1"/>
+  </material>
+  <material name="yellow">
+      <color rgba="1.0 1.0 0.0 1"/>
+  </material>
+
+  <material name="black">
+      <color rgba="0.0 0.0 0.0 1"/>
+  </material>
+
+  <material name="white">
+      <color rgba="1.0 1.0 1.0 1"/>
+  </material>
+
+  <material name="box_bot_blue">
+      <color rgba="0.088656 0.428691 0.491021 1"/>
+  </material>
+
+    <link name="pcb">
+
+        </link>
+    <gazebo reference="pcb">
+        <material>Gazebo/White</material>
+    </gazebo>
+
+    <link name="base_link">
+        <visual>
+                <geometry>
+                    <mesh filename="file://$(find test_bench_description)/meshes/pcb.stl" />
+                </geometry>
+                <material name="white"/>
+            </visual>
+            <collision>
+                <geometry>
+                    <mesh filename="file://$(find test_bench_description)/meshes/pcb.stl" />
+                </geometry>
+            </collision>
+            <inertial>
+                <origin rpy="0.0 0.0 0.0"
+                    xyz="0.0 0.0 0.00" />
+                <mass value="32.86" />
+                <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827"
+                    iyz="0.0" izz="0.13143999874591827" />
+            </inertial>
+        </link>
+    <joint name="base_link_joint" type="fixed">
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <parent link="pcb" />
+            <child link="base_link" />
+        </joint>
+    <gazebo reference="base_link">
+        <material>Gazebo/White</material>
+    </gazebo>
+    <gazebo reference="base_link_joint">
+    </gazebo>
+
+
+    <link name="bracket">
+          <inertial>
+                <origin rpy="0.0 0.0 0.0"
+                    xyz="0.0 0.0 0.0" />
+                <mass value="32.86" />
+                <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827"
+                    iyz="0.0" izz="0.13143999874591827" />
+            </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="file://$(find test_bench_description)/meshes/brackets.stl" />
+            </geometry>
+            <material name="yellow"/>
+        </visual>
+        <!--collision>
+            <geometry>
+                <mesh filename="file://$(find test_bench_description)/meshes/brackets.stl" />
+            </geometry>
+        </collision-->
+    </link>
+    <joint name="pcb_Lbracket" type="revolute">
+            <origin xyz="0.073 0. 0.073" rpy="1.57 3.14 0" />
+            <parent link="pcb" />
+            <child link="bracket" />
+            <limit effort="1000"  velocity="0.50" lower="-0.0" upper="0.0"/>
+            <axis xyz="0 0 1"/>
+        </joint>
+    <gazebo reference="bracket">
+        <material>Gazebo/Yellow</material>
+    </gazebo>
+    <gazebo reference="pcb_Lbracket"/>
+
+    <link name="PressureBar_virtual">
+        <inertial>
+                <origin rpy="0.000 0 0.0"
+                    xyz="0.00 0.0 0.0" />
+                <mass value="32.86" />
+                <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827"
+                    iyz="0.0" izz="0.13143999874591827" />
+            </inertial>
+     </link>
+    <joint name="pressurebar_virtual_Rbracket" type="revolute">
+            <origin xyz="0.0365 -0.025 -0.003" rpy="0 3.14 0" />
+            <axis xyz="0 1 0" />
+            <parent link="bracket" />
+            <child link="PressureBar_virtual" />
+            <limit effort="1000"  velocity="0.50" lower="-2.5" upper="0."/>
+        </joint>
+    <gazebo reference="PressureBar_virtual">
+        <material>Gazebo/Yellow</material>
+    </gazebo>
+    <gazebo reference="pressurebar_virtual_Rbracket"/>
+
+    <link name="PressureBar">
+          <inertial>
+                <origin rpy="0.000 0 0.0"
+                    xyz="0.00 0.0 0.0" />
+                <mass value="32.86" />
+                <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827"
+                    iyz="0.0" izz="0.13143999874591827" />
+            </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="file://$(find test_bench_description)/meshes/PressureBar.stl" />
+            </geometry>
+            <material name="box_bot_blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="file://$(find test_bench_description)/meshes/PressureBar.stl" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="pressurebar_Rbracket" type="prismatic">
+            <origin xyz="0.0 -0.0 -0.00" rpy="0 0 0" />
+            <axis xyz="0 1 0" />
+            <parent link="PressureBar_virtual" />
+            <child link="PressureBar" />
+            <limit effort="1000"  velocity="0.50" lower="-0.0" upper="0.01"/>
+        </joint>
+    <gazebo reference="PressureBar">
+        <material>Gazebo/SkyBlue</material>
+    </gazebo>
+    <gazebo reference="pressurebar_Rbracket"/>
+
+    <link name="socket">
+        <inertial>
+                <origin rpy="0.00 0 0.0" xyz="0 0.0 0.0" />
+                <mass value="32.86" />
+                <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827"
+                    iyz="0.0" izz="0.13143999874591827" />
+            </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="file://$(find test_bench_description)/meshes/socket.stl" />
+            </geometry>
+            <material name="box_bot_blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="file://$(find test_bench_description)/meshes/socket.stl" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="bracket_socket" type="revolute">
+            <origin xyz="-0.0 0.0 0.0" rpy="-1.57 0 0" />
+            <parent link="bracket" />
+            <child link="socket" />
+            <limit effort="1000"  velocity="0.50" lower="-0.0" upper="0.0"/>
+            <axis xyz="0 0 1"/>
+       </joint>
+    <gazebo reference="socket">
+        <material>Gazebo/Green</material>
+    </gazebo>
+    <gazebo reference="bracket_socket"/>
+
+    <link name="cover">
+          <inertial>
+                <origin rpy="0.000 0 0.0"
+                    xyz="0.00 0.0 0.0" />
+                <mass value="32.86" />
+                <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827"
+                    iyz="0.0" izz="0.13143999874591827" />
+            </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="file://$(find test_bench_description)/meshes/cover2.stl" />
+            </geometry>
+            <material name="blue_light"/>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="file://$(find test_bench_description)/meshes/cover2.stl" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="pressurebar_cover" type="revolute">
+            <origin xyz="0.005 -0.003 0.005" rpy="1.57 0 3.14" />
+            <axis xyz="0 0 -1" />
+            <parent link="PressureBar_virtual" />
+            <child link="cover" />
+            <limit effort="1000"  velocity="0.50" lower="-0.75" upper="0"/>
+        </joint>
+    <gazebo reference="cover">
+        <material>Gazebo/Gray</material>
+    </gazebo>
+    <gazebo reference="pressurebar_cover"/>
+
+<!--
+
+    <link name="PressureBar">
+          <inertial>
+                <origin rpy="0.001 0 0.0"
+                    xyz="0.00 0.0 0.0" />
+                <mass value="32.86" />
+                <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827"
+                    iyz="0.0" izz="0.13143999874591827" />
+            </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/PressureBar2.stl" />
+            </geometry>
+            <material name="box_bot_blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/PressureBar2.stl" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="pressurebar_Rbracket" type="prismatic">
+            <origin xyz="-0.00 0.00 0.0" rpy="0 0 0" />
+            <axis xyz="0 0 1" />
+            <parent link="PressureBar_x" />
+            <child link="PressureBar" />
+            <limit effort="1000"  velocity="0.50" lower="-0.01" upper="0.0"/>
+        </joint>
+
+    <link name="cover">
+        <inertial>
+                <origin rpy="0.0 0.0 0.0"
+                    xyz="0.0 0.0 0.0" />
+                <mass value="32.86" />
+                <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827"
+                    iyz="0.0" izz="0.13143999874591827" />
+            </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/CPU-FlatCover2.stl" />
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/CPU-FlatCover2.stl" />
+            </geometry>
+        </collision>
+
+    </link>
+
+     <joint name="cover_pressurebar" type="revolute">
+            <origin xyz="-0.005 0.00 0.057" rpy="0 3.14 0" />
+            <axis xyz="0 0 1" />
+            <parent link="PressureBar_x" />
+            <child link="cover" />
+            <limit effort="1000" velocity="1000.00" lower="-2.5" upper="0" />
+        </joint>-->
+
+
+
+</robot>

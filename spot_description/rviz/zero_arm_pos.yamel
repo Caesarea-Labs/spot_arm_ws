@@ -1,0 +1,10 @@
+joint_state_publisher_gui:
+    ros__parameters:
+        zeros:
+            arm_sh0: 0.0
+            arm_sh1: -3.142
+            arm_el0: 3.142
+            arm_el1: 0.0
+            arm_wr0: 0.0
+            arm_wr1: 0.0
+            arm_f1x: 0.0

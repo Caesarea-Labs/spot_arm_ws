@@ -1,0 +1,220 @@
+<?xml version="1.0"?>
+<robot name="test_bench">
+    <material name="red">
+      <color rgba="1.0 0.0 0.0 1"/>
+  </material>
+
+  <material name="green_light">
+      <color rgba="0.0 1.0 0.0 1"/>
+  </material>
+
+  <material name="green_dark">
+    <color rgba="0.0 0.5 0.0 1"/>
+  </material>
+
+  <material name="blue">
+      <color rgba="0.0 0.0 1.0 1"/>
+  </material>
+
+  <material name="yellow">
+      <color rgba="1.0 1.0 0.0 1"/>
+  </material>
+
+  <material name="black">
+      <color rgba="0.0 0.0 0.0 1"/>
+  </material>
+
+  <material name="white">
+      <color rgba="1.0 1.0 1.0 1"/>
+  </material>
+
+  <material name="box_bot_blue">
+      <color rgba="0.088656 0.428691 0.491021 1"/>
+  </material>
+
+    <link name="base">
+            <visual>
+                <geometry>
+                    <mesh filename="package://test_bench_description/meshes/Base.dae" />
+                </geometry>
+                <material name="white"/>
+            </visual>
+            <collision>
+                <geometry>
+                    <mesh filename="package://test_bench_description/meshes/Base.dae" />
+                </geometry>
+            </collision>
+        </link>
+
+    <link name="base_link">
+            <inertial>
+                <origin rpy="0.0 0.0 0.0"
+                    xyz="0.006394396536052227 -9.812158532440662e-05 0.0009113792330026627" />
+                <mass value="32.86" />
+                <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827"
+                    iyz="0.0" izz="0.13143999874591827" />
+            </inertial>
+        </link>
+    <joint name="base_link_joint" type="fixed">
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <parent link="base" />
+            <child link="base_link" />
+        </joint>
+
+    <link name="solid1">
+          <inertial>
+                <origin rpy="0.0 0.0 0.0"
+                    xyz="0.0 0.0 0.0" />
+                <mass value="32.86" />
+                <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827"
+                    iyz="0.0" izz="0.13143999874591827" />
+            </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/solid1.stl" />
+            </geometry>
+            <material name="yellow"/>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/solid1.stl" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="base_solid1_joint" type="fixed">
+            <origin xyz="0 0.08 0.1" rpy="0 0 0" />
+            <parent link="base" />
+            <child link="solid1" />
+        </joint>
+
+    <link name="solid3">
+          <inertial>
+                <origin rpy="0.0 0.0 0.0"
+                    xyz="0.0 0.0 0.0" />
+                <mass value="32.86" />
+                <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827"
+                    iyz="0.0" izz="0.13143999874591827" />
+            </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/solid3.stl" />
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/solid3.stl" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="solid1_solid3_joint" type="fixed">
+            <origin xyz="0 0 -0.012" rpy="0 0 0" />
+            <parent link="solid1" />
+            <child link="solid3" />
+        </joint>
+
+    <link name="solid16">
+          <inertial>
+                <origin rpy="0.0 0.0 0.0"
+                    xyz="0.0 0.0 0.0" />
+                <mass value="32.86" />
+                <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827"
+                    iyz="0.0" izz="0.13143999874591827" />
+            </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/solid16.stl" />
+            </geometry>
+            <material name="box_bot_blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/solid16.stl" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="solid1_solid16_joint" type="fixed">
+            <origin xyz="0 0 0.004" rpy="0 0 0" />
+            <parent link="solid1" />
+            <child link="solid16" />
+        </joint>
+
+    <link name="solid17">
+          <inertial>
+                <origin rpy="0.0 0.0 0.0"
+                    xyz="0.0 0.0 0.0" />
+                <mass value="32.86" />
+                <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827"
+                    iyz="0.0" izz="0.13143999874591827" />
+            </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/solid17.stl" />
+            </geometry>
+            <material name="red"/>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/solid17.stl" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="solid16_solid17_joint" type="fixed">
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <parent link="solid16" />
+            <child link="solid17" />
+        </joint>
+
+    <link name="solid15">
+          <inertial>
+                <origin rpy="0.0 0.0 0.0"
+                    xyz="0.0 0.0 0.0" />
+                <mass value="32.86" />
+                <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827"
+                    iyz="0.0" izz="0.13143999874591827" />
+            </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/solid15.stl" />
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/solid15.stl" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="solid15_solid17_joint" type="fixed">
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <parent link="solid17" />
+            <child link="solid15" />
+        </joint>
+
+    <link name="surface">
+          <inertial>
+                <origin rpy="0.0 0.0 0.0"
+                    xyz="0.0 0.0 0.0" />
+                <mass value="32.86" />
+                <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827"
+                    iyz="0.0" izz="0.13143999874591827" />
+            </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/surface.stl" />
+            </geometry>
+            <material name="green_light"/>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://test_bench_description/meshes/surface.stl" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="solid3_surface_joint" type="fixed">
+            <origin xyz="-0.002 0.001 0.012" rpy="0 0 0" />
+            <parent link="solid3" />
+            <child link="surface" />
+        </joint>
+
+</robot>

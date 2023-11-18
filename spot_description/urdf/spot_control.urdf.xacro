@@ -1,0 +1,81 @@
+<?xml version="1.0" ?>
+    <robot name="spot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+      <xacro:include filename="$(find spot_description)/urdf/spot_macro_control.xacro" />
+
+      <!-- Parameters -->
+      <xacro:arg name="arm" default="true" />
+      <xacro:arg name="tf_prefix" default="" />
+
+    <!-- Load Spot -->
+      <xacro:load_spot
+        arm="$(arg arm)"
+        tf_prefix="$(arg tf_prefix)" />
+
+
+      <!--ros2_control name="GazeboSimSystem" type="system">
+                <hardware>
+                    <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+                </hardware>
+                <joint name="${tf_prefix}arm_sh0">
+                    <command_interface name="position">
+
+                    </command_interface>
+                    <state_interface name="position">
+                        <param name="initial_value">0.0</param>
+                    </state_interface>
+                    <state_interface name="velocity"/>
+                </joint>
+                <joint name="${tf_prefix}arm_sh1">
+                    <command_interface name="position">
+
+                    </command_interface>
+                    <state_interface name="position">
+                        <param name="initial_value">-3.12</param>
+                    </state_interface>
+                    <state_interface name="velocity"/>
+                </joint>
+                <joint name="${tf_prefix}arm_el0">
+                    <command_interface name="position">
+
+                    </command_interface>
+                    <state_interface name="position">
+                         <param name="initial_value">3.12</param>
+                    </state_interface>
+                    <state_interface name="velocity"/>
+                </joint>
+                <joint name="${tf_prefix}arm_el1">
+                    <command_interface name="position">
+                    </command_interface>
+                    <state_interface name="position">
+                        <param name="initial_value">0.0</param>
+                    </state_interface>
+                    <state_interface name="velocity"/>
+                </joint>
+                <joint name="${tf_prefix}arm_wr0">
+                    <command_interface name="position">
+
+                    </command_interface>
+                    <state_interface name="position">
+                        <param name="initial_value">0.0</param>
+                    </state_interface>
+                    <state_interface name="velocity"/>
+                </joint>
+                <joint name="${tf_prefix}arm_wr1">
+                    <command_interface name="position">
+
+                    </command_interface>
+                    <state_interface name="position">
+                        <param name="initial_value">0.0</param>
+                    </state_interface>
+                    <state_interface name="velocity"/>
+                </joint>
+     </ros2_control-->
+      <!--gazebo>
+        <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+          <parameters>$(find spot_arm_moveit_config)/config/ros2_controllers.yaml </parameters>
+        </plugin>
+      </gazebo-->
+
+
+    </robot>
