@@ -52,6 +52,12 @@
                 <geometry>
                     <mesh filename="file://$(find test_bench_description)/meshes/pcb.stl" />
                 </geometry>
+                <surface>
+                    <friction>
+                        <mu>0.1</mu>
+                        <mu2>0.1</mu2>
+                    </friction>
+                </surface>
             </collision>
             <inertial>
                 <origin rpy="0.0 0.0 0.0"
@@ -98,7 +104,13 @@
             <parent link="pcb" />
             <child link="bracket" />
             <limit effort="1000"  velocity="0.50" lower="-0.0" upper="0.0"/>
-            <axis xyz="0 0 1"/>
+        <axis xyz="0 0 1">
+            <dynamics>
+                <damping>0.5</damping>
+                <friction>0.5</friction>
+            </dynamics>
+        </axis>
+
         </joint>
     <gazebo reference="bracket">
         <material>Gazebo/Yellow</material>

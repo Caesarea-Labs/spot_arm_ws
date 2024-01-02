@@ -93,7 +93,7 @@
           target_pose.position.y = current_pose.pose.position.y;
           target_pose.position.z = current_pose.pose.position.z;
           std::vector<geometry_msgs::msg::Pose> scan_waypoints;
-          double delta=0.1;
+          double delta=0.2;
           target_pose.position.y -= delta;
           target_pose.position.z -= delta;
           //target_pose.orientation.y = -1.5/2;
@@ -127,7 +127,7 @@
             RCLCPP_INFO(LOGGER, "Planning failed, no execution");
           }
 
-          move_group_grip.setNamedTarget("closed");
+          move_group_grip.setNamedTarget("open");
           success_grip = (move_group_grip.plan(my_plan_grip) == moveit::core::MoveItErrorCode::SUCCESS);
           move_group_grip.execute(my_plan_grip);
 

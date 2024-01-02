@@ -105,7 +105,7 @@ def generate_launch_description():
                         arguments=['-entity', 'Chip', '-file',sdf_model,
                                    '-x', str(random.gauss(0,0.1)),
                                    '-y', str(random.gauss(0,0.1)),
-                                   '-z', '1.5',
+                                   '-z', '0.1',
                                    '-R', '0.0',
                                    '-P', '0.0',
                                    '-Y', str(random.gauss(0,1))
@@ -148,7 +148,7 @@ def generate_launch_description():
         arguments=['-topic', '/socket_description',
                    '-entity', 'socket',
                    '-x', '0.1',
-                   '-z', '1.01',
+                   '-z', '0.1',
                    '-y', '0.1',
                    '-R', '1.57',
                    '-Y', '1.57'
