@@ -76,37 +76,6 @@ class Camera_subscriber(Node):
 
 
 
-# class Yolo_subscriber(Node):
-#
-#     def __init__(self):
-#         super().__init__('yolo_subscriber')
-#
-#         self.subscription = self.create_subscription(
-#             Yolov8Inference,
-#             '/Yolov8_Inference',
-#             self.yolo_callback,
-#             10)
-#         self.subscription
-#
-#         self.cnt = 0
-#
-#         self.img_pub = self.create_publisher(Image, "/inference_result_cv2", 1)
-#
-#     def yolo_callback(self, data):
-#         global img
-#         for r in data.yolov8_inference:
-#             class_name = r.class_name
-#             top = r.top
-#             left = r.left
-#             bottom = r.bottom
-#             right = r.right
-#             yolo_subscriber.get_logger().info(f"{self.cnt} {class_name} : {top}, {left}, {bottom}, {right}")
-#             cv2.rectangle(img, (top, left), (bottom, right), (255, 255, 0))
-#             self.cnt += 1
-#
-#         self.cnt = 0
-#         img_msg = bridge.cv2_to_imgmsg(img)
-#         self.img_pub.publish(img_msg)
 
 def main(args=None):
     rclpy.init(args=args)
