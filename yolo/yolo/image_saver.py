@@ -25,11 +25,13 @@ class Camera_subscriber(Node):
 
         # Using cv2.imshow() method
         # Displaying the image
-        model_file = os.path.join(get_package_share_directory('yolo'),'models','best.pt')
-        self.model = YOLO(model_file)
+        model_file_detection = os.path.join(get_package_share_directory('yolo'),'models','best_detect.onnx')
+        self.model_detection = YOLO(model_file_detection)
+        model_file_pose = os.path.join(get_package_share_directory('yolo'), 'models', 'best_pose.onnx')
+        self.model_pose = YOLO(model_file_pose)
         self.yolov8_inference = Yolov8Inference()
         print("YOLO model loaded")
-        self.subscription = self.create_subscription(Image,'/camera/image_raw', self.camera_callback, 10)
+        self.subscription = self.create_subscription(Image,'/camera/image_raw', self.camera_callback, 1)
         print("Image subscription created")
 
         self.YOLO_pub = self.create_publisher(Image,"/detection_results",1)
@@ -39,7 +41,7 @@ class Camera_subscriber(Node):
     def camera_callback(self, data):
         global img
         img = bridge.imgmsg_to_cv2(data, 'bgr8')
-        results = self.model(img)
+        results = self.model_detection(img)
         self.yolov8_inference.header.frame_id = "inference"
         self.yolov8_inference.header.stamp = self.get_clock().now().to_msg()
 
@@ -58,11 +60,6 @@ class Camera_subscriber(Node):
 
         self.yolov8_pub.publish(self.yolov8_inference)
         self.yolov8_inference.yolov8_inference.clear()
-
-
-
-
-
         res_img = results[0].plot()
         # res_img = cv2.cvtColor(res_img, cv2.COLOR_BGR2HSV)
         # print(data.height,data.width, data.encoding)
@@ -70,7 +67,11 @@ class Camera_subscriber(Node):
         # cv2.waitKey(20)
         # cv2.destroyAllWindows()
         # cv2.imwrite('sample_out_1.png', img)
-        self.YOLO_pub.publish(bridge.cv2_to_imgmsg(res_img,'bgr8'))
+        # self.YOLO_pub.publish(bridge.cv2_to_imgmsg(res_img,'bgr8'))
+        results_pose = self.model_pose(img)
+        print(results_pose)
+        res_pose = results_pose[0].plot()
+        self.YOLO_pub.publish(bridge.cv2_to_imgmsg(res_pose, 'bgr8'))
 
 
 
