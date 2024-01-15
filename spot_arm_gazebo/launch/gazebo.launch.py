@@ -52,7 +52,7 @@ def generate_launch_description():
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
-            PathJoinSubstitution([package_description_path, "urdf", "spot_control.urdf.xacro"]),
+            PathJoinSubstitution([package_description_path, "urdf", "spot_control_gazebo.urdf.xacro"]),
             " ",
             # "arm:=true",
             # LaunchConfiguration("arm"),
@@ -75,12 +75,17 @@ def generate_launch_description():
         output='screen'
     )
     load_arm_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'spot_arm_controller'],
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'arm_controller'],
         output='screen'
     )
 
     load_grip_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'grip_controller'],
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'hand_controller'],
+        output='screen'
+    )
+
+    load_cl_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'cl_controller'],
         output='screen'
     )
 
@@ -105,7 +110,7 @@ def generate_launch_description():
                         arguments=['-entity', 'Chip', '-file',sdf_model,
                                    '-x', str(random.gauss(0,0.1)),
                                    '-y', str(random.gauss(0,0.1)),
-                                   '-z', '0.1',
+                                   '-z', '0.71',
                                    '-R', '0.0',
                                    '-P', '0.0',
                                    '-Y', str(random.gauss(0,1))
@@ -148,12 +153,22 @@ def generate_launch_description():
         arguments=['-topic', '/socket_description',
                    '-entity', 'socket',
                    '-x', '0.1',
-                   '-z', '0.1',
+                   '-z', '0.71',
                    '-y', '0.1',
                    '-R', '1.57',
                    '-Y', '1.57'
                    ],
         output='screen')
+
+    # # start the actual move_group node
+    # use_sim_time = {"use_sim_time": True}
+    # config_dict = moveit_config.to_dict()
+    # config_dict.update(use_sim_time)
+    # run_move_group_node = Node(
+    #     package = "moveit_ros_move_group",
+    #     exectable = "move_group"
+    # )
+
 
 
 
@@ -196,8 +211,14 @@ def generate_launch_description():
                 on_exit=[load_arm_controller],
             )
         ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_joint_state_controller,
+                on_exit=[load_cl_controller],
+            )
+        ),
         gazebo,
         node_robot_state_publisher,
-        load_joint_state_controller,
         spawn_entity,
+        load_joint_state_controller,
     ])

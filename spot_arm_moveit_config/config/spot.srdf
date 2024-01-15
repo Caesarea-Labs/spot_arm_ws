@@ -9,30 +9,31 @@
     <!--JOINTS: When a joint is specified, the child link of that joint (which will always exist) is automatically included-->
     <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
     <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
-    <group name="spot_arm">
-        <chain base_link="body" tip_link="arm_link_wr1"/>
+    <group name="arm">
+        <joint name="arm_sh0"/>
+        <joint name="arm_sh1"/>
+        <joint name="arm_el0"/>
+        <joint name="arm_el1"/>
+        <joint name="arm_wr0"/>
+        <joint name="arm_wr1"/>
     </group>
-    <group name="grip">
+    <group name="hand">
         <joint name="arm_f1x"/>
     </group>
+    <group name="cl">
+        <joint name="left_finger_joint"/>
+        <joint name="right_finger_joint"/>
+    </group>
     <!--GROUP STATES: Purpose: Define a named state for a particular group, in terms of joint values. This is useful to define states like 'folded arms'-->
-    <group_state name="home" group="spot_arm">
-        <joint name="arm_el0" value="3.1241"/>
+    <group_state name="home" group="arm">
+        <joint name="arm_el0" value="3.13"/>
         <joint name="arm_el1" value="0"/>
         <joint name="arm_sh0" value="0"/>
-        <joint name="arm_sh1" value="-3.1213"/>
+        <joint name="arm_sh1" value="-3.1349"/>
         <joint name="arm_wr0" value="0"/>
         <joint name="arm_wr1" value="0"/>
     </group_state>
-    <group_state name="ready" group="spot_arm">
-        <joint name="arm_el0" value="2.291"/>
-        <joint name="arm_el1" value="0"/>
-        <joint name="arm_sh0" value="0"/>
-        <joint name="arm_sh1" value="-1.1976"/>
-        <joint name="arm_wr0" value="-1.144"/>
-        <joint name="arm_wr1" value="0"/>
-    </group_state>
-    <group_state name="scan_table" group="spot_arm">
+    <group_state name="scan_low" group="arm">
         <joint name="arm_el0" value="1.57"/>
         <joint name="arm_el1" value="0"/>
         <joint name="arm_sh0" value="0"/>
@@ -40,14 +41,34 @@
         <joint name="arm_wr0" value="1.57"/>
         <joint name="arm_wr1" value="0"/>
     </group_state>
-    <group_state name="closed" group="grip">
+    <group_state name="scan_high" group="arm">
+        <joint name="arm_el0" value="0.8157"/>
+        <joint name="arm_el1" value="0"/>
+        <joint name="arm_sh0" value="0"/>
+        <joint name="arm_sh1" value="-1.3596"/>
+        <joint name="arm_wr0" value="1.8325"/>
+        <joint name="arm_wr1" value="0"/>
+    </group_state>
+    <group_state name="open" group="hand">
+        <joint name="arm_f1x" value="-1.57"/>
+    </group_state>
+    <group_state name="close" group="hand">
         <joint name="arm_f1x" value="0"/>
     </group_state>
-    <group_state name="open" group="grip">
-        <joint name="arm_f1x" value="-1.5006"/>
+    <group_state name="open" group="cl">
+        <joint name="left_finger_joint" value="-0.03"/>
+        <joint name="right_finger_joint" value="0.03"/>
+    </group_state>
+    <group_state name="close" group="cl">
+        <joint name="left_finger_joint" value="0"/>
+        <joint name="right_finger_joint" value="0"/>
+    </group_state>
+    <group_state name="half" group="cl">
+        <joint name="left_finger_joint" value="-0.015"/>
+        <joint name="right_finger_joint" value="0.015"/>
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="hand" parent_link="arm_link_wr1" group="spot_arm"/>
+    <end_effector name="hand" parent_link="arm_link_wr1" group="hand"/>
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="virtual_joint" type="fixed" parent_frame="world" child_link="body"/>
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
@@ -59,20 +80,28 @@
     <disable_collisions link1="arm_link_el0" link2="arm_link_wr1" reason="Never"/>
     <disable_collisions link1="arm_link_el0" link2="front_left_lower_leg" reason="Never"/>
     <disable_collisions link1="arm_link_el0" link2="front_right_lower_leg" reason="Never"/>
+    <disable_collisions link1="arm_link_el0" link2="griper_base_link" reason="Never"/>
+    <disable_collisions link1="arm_link_el0" link2="left_finger_link" reason="Never"/>
     <disable_collisions link1="arm_link_el0" link2="rear_left_lower_leg" reason="Never"/>
     <disable_collisions link1="arm_link_el0" link2="rear_left_upper_leg" reason="Never"/>
     <disable_collisions link1="arm_link_el0" link2="rear_right_lower_leg" reason="Never"/>
     <disable_collisions link1="arm_link_el0" link2="rear_right_upper_leg" reason="Never"/>
+    <disable_collisions link1="arm_link_el0" link2="right_finger_link" reason="Never"/>
     <disable_collisions link1="arm_link_el1" link2="arm_link_fngr" reason="Never"/>
     <disable_collisions link1="arm_link_el1" link2="arm_link_hr0" reason="Never"/>
     <disable_collisions link1="arm_link_el1" link2="arm_link_wr0" reason="Adjacent"/>
     <disable_collisions link1="arm_link_el1" link2="arm_link_wr1" reason="Never"/>
+    <disable_collisions link1="arm_link_el1" link2="griper_base_link" reason="Never"/>
+    <disable_collisions link1="arm_link_el1" link2="left_finger_link" reason="Never"/>
     <disable_collisions link1="arm_link_el1" link2="rear_left_lower_leg" reason="Never"/>
     <disable_collisions link1="arm_link_el1" link2="rear_right_lower_leg" reason="Never"/>
     <disable_collisions link1="arm_link_el1" link2="rear_right_upper_leg" reason="Never"/>
+    <disable_collisions link1="arm_link_el1" link2="right_finger_link" reason="Never"/>
     <disable_collisions link1="arm_link_fngr" link2="arm_link_wr0" reason="Never"/>
     <disable_collisions link1="arm_link_fngr" link2="arm_link_wr1" reason="Adjacent"/>
-    <disable_collisions link1="arm_link_fngr" link2="rear_right_lower_leg" reason="Never"/>
+    <disable_collisions link1="arm_link_fngr" link2="griper_base_link" reason="Never"/>
+    <disable_collisions link1="arm_link_fngr" link2="left_finger_link" reason="Default"/>
+    <disable_collisions link1="arm_link_fngr" link2="right_finger_link" reason="Default"/>
     <disable_collisions link1="arm_link_hr0" link2="arm_link_sh0" reason="Adjacent"/>
     <disable_collisions link1="arm_link_hr0" link2="arm_link_wr0" reason="Never"/>
     <disable_collisions link1="arm_link_hr0" link2="front_left_lower_leg" reason="Never"/>
@@ -91,10 +120,15 @@
     <disable_collisions link1="arm_link_sh0" link2="rear_right_lower_leg" reason="Never"/>
     <disable_collisions link1="arm_link_sh0" link2="rear_right_upper_leg" reason="Never"/>
     <disable_collisions link1="arm_link_wr0" link2="arm_link_wr1" reason="Adjacent"/>
+    <disable_collisions link1="arm_link_wr0" link2="griper_base_link" reason="Adjacent"/>
+    <disable_collisions link1="arm_link_wr0" link2="left_finger_link" reason="Default"/>
     <disable_collisions link1="arm_link_wr0" link2="rear_left_lower_leg" reason="Never"/>
     <disable_collisions link1="arm_link_wr0" link2="rear_right_lower_leg" reason="Never"/>
     <disable_collisions link1="arm_link_wr0" link2="rear_right_upper_leg" reason="Never"/>
-    <disable_collisions link1="arm_link_wr1" link2="rear_right_lower_leg" reason="Never"/>
+    <disable_collisions link1="arm_link_wr0" link2="right_finger_link" reason="Default"/>
+    <disable_collisions link1="arm_link_wr1" link2="griper_base_link" reason="Default"/>
+    <disable_collisions link1="arm_link_wr1" link2="left_finger_link" reason="Default"/>
+    <disable_collisions link1="arm_link_wr1" link2="right_finger_link" reason="Default"/>
     <disable_collisions link1="body" link2="front_left_lower_leg" reason="Never"/>
     <disable_collisions link1="body" link2="front_left_upper_leg" reason="Adjacent"/>
     <disable_collisions link1="body" link2="front_right_lower_leg" reason="Never"/>
@@ -125,10 +159,17 @@
     <disable_collisions link1="front_right_upper_leg" link2="rear_left_upper_leg" reason="Never"/>
     <disable_collisions link1="front_right_upper_leg" link2="rear_right_lower_leg" reason="Never"/>
     <disable_collisions link1="front_right_upper_leg" link2="rear_right_upper_leg" reason="Never"/>
+    <disable_collisions link1="griper_base_link" link2="left_finger_link" reason="Adjacent"/>
+    <disable_collisions link1="griper_base_link" link2="rear_left_lower_leg" reason="Never"/>
+    <disable_collisions link1="griper_base_link" link2="rear_right_lower_leg" reason="Never"/>
+    <disable_collisions link1="griper_base_link" link2="right_finger_link" reason="Adjacent"/>
+    <disable_collisions link1="left_finger_link" link2="rear_right_lower_leg" reason="Never"/>
+    <disable_collisions link1="left_finger_link" link2="right_finger_link" reason="Default"/>
     <disable_collisions link1="rear_left_lower_leg" link2="rear_left_upper_leg" reason="Adjacent"/>
     <disable_collisions link1="rear_left_lower_leg" link2="rear_right_lower_leg" reason="Never"/>
     <disable_collisions link1="rear_left_lower_leg" link2="rear_right_upper_leg" reason="Never"/>
     <disable_collisions link1="rear_left_upper_leg" link2="rear_right_lower_leg" reason="Never"/>
     <disable_collisions link1="rear_left_upper_leg" link2="rear_right_upper_leg" reason="Never"/>
     <disable_collisions link1="rear_right_lower_leg" link2="rear_right_upper_leg" reason="Adjacent"/>
+    <disable_collisions link1="rear_right_lower_leg" link2="right_finger_link" reason="Never"/>
 </robot>

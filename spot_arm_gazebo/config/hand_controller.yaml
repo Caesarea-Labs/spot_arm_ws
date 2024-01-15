@@ -2,9 +2,9 @@ controller_manager:
   ros__parameters:
     update_rate: 100  # Hz
 
-    grip_controller:
+    hand_controller:
       type: position_controllers/GripperActionController
 
-grip_controller:
+hand_controller:
   ros__parameters:
     joint: arm_f1x

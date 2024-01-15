@@ -1,0 +1,10 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+
+    cl_controller:
+      type: position_controllers/GripperActionController
+
+cl_controller:
+  ros__parameters:
+    joint: left_finger_joint

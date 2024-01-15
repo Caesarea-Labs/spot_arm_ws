@@ -1,13 +1,13 @@
 moveit_setup_assistant_config:
   urdf:
     package: spot_description
-    relative_path: urdf/spot.urdf.xacro
+    relative_path: urdf/spot_control.urdf.xacro
   srdf:
     relative_path: config/spot.srdf
   package_settings:
     author_name: lior
     author_email: falachl@gmail.com
-    generated_timestamp: 1699004441
+    generated_timestamp: 1705307238
   control_xacro:
     command:
       - position

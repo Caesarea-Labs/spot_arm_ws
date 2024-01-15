@@ -1,5 +1,4 @@
-#
-# Copyright (c) 2018 Pilz GmbH & Co. KG
+# Copyright 2015 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,17 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-controller_list:
-  - name: fake_manipulator_controller
-    type: $(arg execution_type)
-    joints:
-      - prbt_joint_1
-      - prbt_joint_2
-      - prbt_joint_3
-      - prbt_joint_4
-      - prbt_joint_5
-      - prbt_joint_6
-  - name: fake_gripper_controller
-    type: $(arg execution_type)
-    joints:
-      - prbt_gripper_finger_left_joint
+from ament_copyright.main import main
+import pytest
+
+
+# Remove the `skip` decorator once the source file(s) have a copyright header
+@pytest.mark.skip(reason='No copyright header has been placed in the generated source file.')
+@pytest.mark.copyright
+@pytest.mark.linter
+def test_copyright():
+    rc = main(argv=['.', 'test'])
+    assert rc == 0, 'Found errors'

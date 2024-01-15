@@ -1,5 +1,4 @@
-#
-# Copyright © 2018 Pilz GmbH & Co. KG
+# Copyright 2015 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,15 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gripper_joint_trajectory_controller:
-  type: position_controllers/JointTrajectoryController
-  joints:
-     - prbt_gripper_finger_left_joint
-  constraints:
-      goal_time: 0.6
-      stopped_velocity_tolerance: 0.05
-      prbt_gripper_finger_left_joint: {trajectory: 0.001, goal: 0.001}
-  stop_trajectory_duration: 0.1
-  state_publish_rate:  25
-  action_monitor_rate: 10
-  required_drive_mode: 7
+from ament_pep257.main import main
+import pytest
+
+
+@pytest.mark.linter
+@pytest.mark.pep257
+def test_pep257():
+    rc = main(argv=['.', 'test'])
+    assert rc == 0, 'Found code style errors / warnings'

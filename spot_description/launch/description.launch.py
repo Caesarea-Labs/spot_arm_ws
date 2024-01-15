@@ -11,7 +11,7 @@ from launch.substitutions import (
 )
 
 pkg_share = launch_ros.substitutions.FindPackageShare(package="spot_description").find("spot_description")
-default_model_path = os.path.join(pkg_share, "urdf/spot.urdf.xacro")
+default_model_path = os.path.join(pkg_share, "urdf/spot_control_gazebo.urdf.xacro")
 default_rviz2_path = os.path.join(pkg_share, "rviz/viz_spot2.rviz")
 
 
@@ -22,7 +22,7 @@ def launch_setup(context: launch.LaunchContext) -> typing.List[launch_ros.action
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
-            PathJoinSubstitution([pkg_share, "urdf", "spot.urdf.xacro"]),
+            PathJoinSubstitution([pkg_share, "urdf", "spot_control.urdf.xacro"]),
             " ",
             "arm:=",
             LaunchConfiguration("arm"),
