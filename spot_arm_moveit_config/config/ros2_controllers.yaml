@@ -1,3 +1,4 @@
+# This config file is used by ros2_control
 controller_manager:
   ros__parameters:
     update_rate: 100  # Hz
@@ -29,4 +30,7 @@ spot_arm_controller:
       - velocity
 grip_controller:
   ros__parameters:
-    joint: arm_f1x
+    joints:
+      - arm_f1x
+      - left_finger_joint
+      - right_finger_joint

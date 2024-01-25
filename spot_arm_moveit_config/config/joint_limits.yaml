@@ -10,36 +10,46 @@ default_acceleration_scaling_factor: 0.1
 joint_limits:
   arm_el0:
     has_velocity_limits: true
-    max_velocity: 10.0
+    max_velocity: 1000.0
     has_acceleration_limits: false
     max_acceleration: 0
   arm_el1:
     has_velocity_limits: true
-    max_velocity: 10.0
+    max_velocity: 1000.0
     has_acceleration_limits: false
     max_acceleration: 0
   arm_f1x:
     has_velocity_limits: true
-    max_velocity: 1.0
+    max_velocity: 1000.0
     has_acceleration_limits: false
     max_acceleration: 0
   arm_sh0:
     has_velocity_limits: true
-    max_velocity: 10.0
+    max_velocity: 1000.0
     has_acceleration_limits: false
     max_acceleration: 0
   arm_sh1:
     has_velocity_limits: true
-    max_velocity: 10.0
+    max_velocity: 1000.0
     has_acceleration_limits: false
     max_acceleration: 0
   arm_wr0:
     has_velocity_limits: true
-    max_velocity: 10.0
+    max_velocity: 1000.0
     has_acceleration_limits: false
     max_acceleration: 0
   arm_wr1:
     has_velocity_limits: true
-    max_velocity: 10.0
+    max_velocity: 1000.0
+    has_acceleration_limits: false
+    max_acceleration: 0
+  left_finger_joint:
+    has_velocity_limits: true
+    max_velocity: 1000.0
+    has_acceleration_limits: false
+    max_acceleration: 0
+  right_finger_joint:
+    has_velocity_limits: true
+    max_velocity: 1000.0
     has_acceleration_limits: false
     max_acceleration: 0
