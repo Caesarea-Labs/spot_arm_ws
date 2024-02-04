@@ -865,7 +865,7 @@
 
                     </command_interface>
                     <state_interface name="position">
-                        <param name="initial_value">-3.12</param>
+                        <param name="initial_value">-3.11</param>
                     </state_interface>
                     <state_interface name="velocity"/>
                 </joint>
@@ -874,7 +874,7 @@
 
                     </command_interface>
                     <state_interface name="position">
-                         <param name="initial_value">3.12</param>
+                         <param name="initial_value">3.11</param>
                     </state_interface>
                     <state_interface name="velocity"/>
                 </joint>

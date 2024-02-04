@@ -54,7 +54,7 @@
         <joint name="arm_f1x" value="-1.5527"/>
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="hand_ee" parent_link="arm_link_wr1" group="spot_arm"/>
+    <end_effector name="hand_ee" parent_link="arm_link_wr1" group="grip_f"/>
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="virtual_joint" type="fixed" parent_frame="world" child_link="body"/>
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->

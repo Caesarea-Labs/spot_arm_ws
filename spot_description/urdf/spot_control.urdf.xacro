@@ -3,6 +3,7 @@
 
       <xacro:include filename="$(find spot_description)/urdf/spot_macro_control.xacro" />
 
+
       <!-- Parameters -->
       <xacro:arg name="arm" default="true" />
       <xacro:arg name="tf_prefix" default="" />

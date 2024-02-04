@@ -105,10 +105,10 @@ def generate_launch_description():
                         arguments=['-entity', 'Chip', '-file',sdf_model,
                                    '-x', str(random.gauss(0,0.1)),
                                    '-y', str(random.gauss(0,0.1)),
-                                   '-z', '0.1',
+                                   '-z', '0.71',
                                    '-R', '0.0',
                                    '-P', '0.0',
-                                   '-Y', str(random.gauss(0,1))
+                                   '-Y', str(random.uniform(-0.2,0))
                                    ], output='screen')
     table_model = os.path.join(get_package_share_directory('spot_arm_gazebo'),
                              'models', 'table',
@@ -148,7 +148,7 @@ def generate_launch_description():
         arguments=['-topic', '/socket_description',
                    '-entity', 'socket',
                    '-x', '0.1',
-                   '-z', '0.1',
+                   '-z', '0.71',
                    '-y', '0.1',
                    '-R', '1.57',
                    '-Y', '1.57'
