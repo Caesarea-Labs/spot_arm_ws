@@ -438,6 +438,7 @@
         </material>
       </visual>
       <collision>
+          <origin xyz="0.118 0.0 -0.07" rpy="1.57 0 0" />
         <geometry>
           <mesh filename="file://$(find spot_description)/meshes/arm/collision/left_finger.stl" scale="1000 1000 1000"/>
         </geometry>
@@ -474,6 +475,7 @@
         </material>
       </visual>
       <collision>
+          <origin xyz="0.118 0.02 -0.07" rpy="1.57 0 0" />
         <geometry>
           <mesh filename="file://$(find spot_description)/meshes/arm/collision/right_finger.stl" scale="1000 1000 1000"/>
         </geometry>
