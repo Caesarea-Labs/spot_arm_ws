@@ -431,7 +431,7 @@
         <visual>
         <origin xyz="0.118 0.0 -0.07" rpy="1.57 0 0" />
         <geometry>
-          <mesh filename="file://$(find spot_description)/meshes/arm/visual/left_finger.stl" scale="1000 1000 1000"/>
+          <mesh filename="file://$(find spot_description)/meshes/arm/visual/left_finger_2.stl" scale="1000 1000 1000"/>
         </geometry>
         <material name="arm_link_wr1">
           <color rgba="0.2 0.2 0.2 1" />
@@ -440,7 +440,7 @@
       <collision>
           <origin xyz="0.118 0.0 -0.07" rpy="1.57 0 0" />
         <geometry>
-          <mesh filename="file://$(find spot_description)/meshes/arm/collision/left_finger.stl" scale="1000 1000 1000"/>
+          <mesh filename="file://$(find spot_description)/meshes/arm/collision/left_finger_2.stl" scale="1000 1000 1000"/>
         </geometry>
       </collision>
 
@@ -457,7 +457,7 @@
             <axis xyz="0 1 0" />
             <parent link="${tf_prefix}griper_base_link" />
             <child link="${tf_prefix}left_finger_link" />
-            <limit effort="1000" velocity="1000.00" lower="-0.03"
+            <limit effort="1" velocity="10.00" lower="-0.03"
                 upper="0.0" />
         </joint>
         <gazebo reference="${tf_prefix}left_finger_link">
@@ -468,7 +468,7 @@
       <visual>
         <origin xyz="0.118 0.02 -0.07" rpy="1.57 0 0" />
         <geometry>
-          <mesh filename="file://$(find spot_description)/meshes/arm/visual/right_finger.stl" scale="1000 1000 1000"/>
+          <mesh filename="file://$(find spot_description)/meshes/arm/visual/right_finger_2.stl" scale="1000 1000 1000"/>
         </geometry>
         <material name="arm_link_wr1">
           <color rgba="0.2 0.2 0.2 1" />
@@ -477,7 +477,7 @@
       <collision>
           <origin xyz="0.118 0.02 -0.07" rpy="1.57 0 0" />
         <geometry>
-          <mesh filename="file://$(find spot_description)/meshes/arm/collision/right_finger.stl" scale="1000 1000 1000"/>
+          <mesh filename="file://$(find spot_description)/meshes/arm/collision/right_finger_2.stl" scale="1000 1000 1000"/>
         </geometry>
       </collision>
 
@@ -494,7 +494,7 @@
             <axis xyz="0 1 0" />
             <parent link="${tf_prefix}griper_base_link" />
             <child link="${tf_prefix}right_finger_link" />
-            <limit effort="1000" velocity="1000.00" lower="-0.0" upper="0.03" />
+            <limit effort="1" velocity="10.00" lower="-0.0" upper="0.03" />
         </joint>
         <gazebo reference="${tf_prefix}right_finger_link">
             <material>Gazebo/DarkGrey</material>
@@ -1089,8 +1089,8 @@
                     <horizontal_fov>1.089</horizontal_fov>
                     <image>
                         <format>R8G8B8</format>
-                        <width>640</width>
-                        <height>480</height>
+                        <width>1920</width>
+                        <height>1080</height>
                     </image>
                     <clip>
                         <near>0.05</near>

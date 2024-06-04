@@ -27,6 +27,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     "msg/Chip.msg"
     "msg/Socket.msg"
     "msg/Ws.msg"
+    "srv/Move.srv"
     DEPENDENCIES std_msgs
  )
 ament_export_dependencies(rosidl_default_runtime)

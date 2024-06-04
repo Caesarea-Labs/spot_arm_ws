@@ -1,0 +1,5 @@
+string group
+int64 mode
+string pose_name
+---
+bool success

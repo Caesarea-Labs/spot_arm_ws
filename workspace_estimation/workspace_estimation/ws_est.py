@@ -48,7 +48,6 @@ class chip:
     def comp_ang_z(self):
         self.ang_z=np.arctan2(self.key_y[3]-self.key_y[0],self.key_x[3]-self.key_x[0])
 
-
 class socket:
     def __init__(self):
         self.detected = False

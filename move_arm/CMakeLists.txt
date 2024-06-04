@@ -16,6 +16,7 @@ find_package(interactive_markers REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(moveit_msgs REQUIRED)
+find_package(yolov8_msgs REQUIRED)
 
 
 if(BUILD_TESTING)
@@ -42,11 +43,28 @@ ament_target_dependencies(move_arm
 	moveit_ros_planning_interface
 	interactive_markers
 	moveit_ros_planning
-	control_msgs)
+	control_msgs
+	yolov8_msgs)
+
+add_executable(move_arm_class
+    src/move_arm_class.cpp)
+target_include_directories(move_arm_class
+    PUBLIC include)
+ament_target_dependencies(move_arm_class
+    ament_cmake
+	rclcpp
+	rclcpp_action
+	moveit_core
+	moveit_ros_planning_interface
+	interactive_markers
+	moveit_ros_planning
+	control_msgs
+	std_msgs)
 
 # Install the executable
 install(TARGETS
 	move_arm
+	move_arm_class
     DESTINATION lib/${PROJECT_NAME}
 )
 # Install the launch file
