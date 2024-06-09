@@ -1203,7 +1203,7 @@
       <axis xyz="1 0 0" />
       <parent link="${tf_prefix}arm_link_wr1" />
       <child link="vacuum_gripper3" />
-      <origin rpy="0 1.5708 0" xyz="0.26 0 0.0125" />
+      <origin rpy="0 1.5708 0" xyz="0.26 0  0.0125" />
       <limit effort="50" velocity="50" lower="0" upper="0" />
       <dynamics damping="0.0" friction="10"/>
     </joint>
