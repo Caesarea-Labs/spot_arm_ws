@@ -3,7 +3,7 @@
   <model name='12gen'>
     <link name='link_2'>
       <inertial>
-        <mass>1</mass>
+        <mass>0.1</mass>
         <inertia>
           <ixx>0.166667</ixx>
           <ixy>0</ixy>
@@ -93,14 +93,14 @@
     </link>
     <link name='link_7'>
       <inertial>
-        <mass>1</mass>
+        <mass>0.1</mass>
         <inertia>
-          <ixx>1.6667</ixx>
+          <ixx>0.16667</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1.66667</iyy>
+          <iyy>0.166667</iyy>
           <iyz>0</iyz>
-          <izz>1.66667</izz>
+          <izz>0.166667</izz>
         </inertia>
         <pose>0 0 0 0 -0 0</pose>
       </inertial>
@@ -146,7 +146,7 @@
         </geometry>
         <surface>
           <friction>
-            <ode>
+            <!--ode>
               <mu>1</mu>
               <mu2>1</mu2>
               <fdir1>0 0 0</fdir1>
@@ -154,17 +154,20 @@
               <slip2>1</slip2>
             </ode>
             <torsional>
-              <coefficient>1</coefficient>
-              <patch_radius>0</patch_radius>
-              <surface_radius>0</surface_radius>
-              <use_patch_radius>1</use_patch_radius>
+              <coefficient>1.0</coefficient>
+              <patch_radius>0.5</patch_radius>
+              <surface_radius>0.5</surface_radius>
+              <use_patch_radius>false</use_patch_radius>
               <ode>
                 <slip>0</slip>
               </ode>
-            </torsional>
+            </torsional-->
+              <mu>0.1</mu>
+              <mu2>0.1</mu2>
+
           </friction>
           <bounce>
-            <restitution_coefficient>0</restitution_coefficient>
+            <restitution_coefficient>0.5</restitution_coefficient>
             <threshold>1e+06</threshold>
           </bounce>
           <contact>
