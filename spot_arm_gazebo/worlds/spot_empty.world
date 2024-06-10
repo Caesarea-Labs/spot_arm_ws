@@ -89,7 +89,7 @@
       <elevation>0</elevation>
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
-    <model name='table'>
+    <!--model name='table'>
       <static>1</static>
       <link name='link'>
         <collision name='surface'>
@@ -283,7 +283,7 @@
         <kinematic>0</kinematic>
       </link>
       <pose>0.098811 0.00937 0 0 -0 0</pose>
-    </model>
+    </model-->
     <state world_name='default'>
       <sim_time>39 569000000</sim_time>
       <real_time>39 739599595</real_time>
@@ -320,5 +320,8 @@
         <projection_type>perspective</projection_type>
       </camera>
     </gui>
+      <plugin name="gazebo_link_attacher" filename="libgazebo_link_attacher.so"/>
+
   </world>
+
 </sdf>

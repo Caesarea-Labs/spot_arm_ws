@@ -1045,6 +1045,8 @@ bool PlanningSceneMonitor::waitForCurrentRobotState(const rclcpp::Time& t, doubl
   }
   bool success = last_robot_motion_time_ >= t;
   // suppress warning if we received an update at all
+  RCLCPP_WARN("t = %.3f", t);
+  RCLCPP_WARN("last_robot_motion_time_ = %.3f", last_update_time_);
   if (!success && prev_robot_motion_time != last_robot_motion_time_)
     RCLCPP_WARN(LOGGER, "Maybe failed to update robot state, time diff: %.3fs", (t - last_robot_motion_time_).seconds());
 

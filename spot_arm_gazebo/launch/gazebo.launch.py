@@ -39,7 +39,7 @@ def generate_launch_description():
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('gazebo_ros'), 'launch'), '/gazebo.launch.py']),
-        # launch_arguments={'world': spot_gazebo}.items(),
+        launch_arguments={'world': spot_gazebo}.items(),
     )
 
     package_description_path=os.path.join(get_package_share_directory('spot_description'))
