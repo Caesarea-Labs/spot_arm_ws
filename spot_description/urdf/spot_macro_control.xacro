@@ -1081,7 +1081,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <cylinder radius="0.005" length="0.01"/>
+          <cylinder radius="0.002" length="0.01"/>
         </geometry>
         <material name="transparent">
           <color rgba="0 0 1 0"/>
@@ -1123,7 +1123,7 @@
       </plugin>
   </gazebo>
      <gazebo reference="vacuum_gripper">
-        <material>Gazebo/Blue</material>
+        <material>Gazebo/Grey</material>
     </gazebo>
 
     <link name="vacuum_gripper2">
@@ -1131,7 +1131,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <cylinder radius="0.005" length="0.01"/>
+          <cylinder radius="0.002" length="0.01"/>
         </geometry>
         <material name="transparent">
           <color rgba="0 0 1 0"/>
@@ -1158,7 +1158,7 @@
       <dynamics damping="0.0" friction="10"/>
     </joint>
     <gazebo reference="vacuum_gripper2">
-        <material>Gazebo/Green</material>
+        <material>Gazebo/Grey</material>
     </gazebo>
      <gazebo>
       <plugin name="gazebo_ros_vacuum_gripper2" filename="libgazebo_ros_vacuum_gripper.so">
@@ -1181,7 +1181,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <cylinder radius="0.005" length="0.01"/>
+          <cylinder radius="0.002" length="0.01"/>
         </geometry>
         <material name="transparent">
           <color rgba="0 0 1 0"/>
@@ -1208,7 +1208,7 @@
       <dynamics damping="0.0" friction="10"/>
     </joint>
     <gazebo reference="vacuum_gripper3">
-        <material>Gazebo/Red</material>
+        <material>Gazebo/Grey</material>
     </gazebo>
         <gazebo>
       <plugin name="gazebo_ros_vacuum_gripper3" filename="libgazebo_ros_vacuum_gripper.so">
@@ -1232,7 +1232,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <cylinder radius="0.005" length="0.01"/>
+          <cylinder radius="0.002" length="0.01"/>
         </geometry>
         <material name="transparent">
           <color rgba="0 0 1 0"/>
@@ -1259,7 +1259,7 @@
       <dynamics damping="0.0" friction="10"/>
     </joint>
     <gazebo reference="vacuum_gripper4">
-        <material>Gazebo/Red</material>
+        <material>Gazebo/Grey</material>
     </gazebo>
         <gazebo>
       <plugin name="gazebo_ros_vacuum_gripper4" filename="libgazebo_ros_vacuum_gripper.so">
