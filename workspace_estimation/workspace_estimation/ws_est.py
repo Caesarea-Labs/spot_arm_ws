@@ -59,10 +59,9 @@ class socket:
         self.ang_y = float("nan")
         self.ang_z = float("nan")
         self.state = 'unknown'
-        self.key_out_x = 4 * [float("nan")]
-        self.key_out_y = 4 * [float("nan")]
-        self.key_in_x = 4 * [float("nan")]
-        self.key_in_y = 4 * [float("nan")]
+        self.key_x = 4 * [float("nan")]
+        self.key_y = 4 * [float("nan")]
+
 
     def undetected(self):
         self.detected = False
@@ -74,12 +73,11 @@ class socket:
         self.ang_y = float("nan")
         self.ang_z = float("nan")
         self.state = 'unknown'
-        self.key_out_x = 4 * [float("nan")]
-        self.key_out_y = 4 * [float("nan")]
-        self.key_in_x = 4 * [float("nan")]
-        self.key_in_y = 4 * [float("nan")]
+        self.key_x = 4 * [float("nan")]
+        self.key_y = 4 * [float("nan")]
+
     def comp_ang_z(self):
-        self.ang_z=np.arctan2(self.key_in_y[3]-self.key_in_y[0],self.key_in_x[3]-self.key_in_x[0])
+        self.ang_z=np.arctan2(self.key_y[3]-self.key_y[0],self.key_x[3]-self.key_x[0])
 
 class Camera_subscriber(Node):
 
@@ -146,19 +144,16 @@ class Camera_subscriber(Node):
                 self.chip.key_x = r.keypointx[0:4]
                 self.chip.key_y = 480 - r.keypointy[0:4]
                 self.chip.comp_ang_z()
-            elif r.class_name == 'socket':
+            elif r.class_name == 'socket_closed':
                 self.socket.pose_detected = True
                 self.socket.state = 'close'
-                self.socket.key_out_x=list()
-                self.socket.key_out_y=list()
-                self.socket.key_in_x = list()
-                self.socket.key_in_y = list()
+                self.socket.key_x=list()
+                self.socket.key_y=list()
+
                 for i in [0, 1, 2, 3]:
-                    self.socket.key_out_x.append(r.keypointx[i])
-                    self.socket.key_out_y.append(480-r.keypointy[i])
-                for i in [4, 5, 6, 7]:
-                    self.socket.key_in_x.append(r.keypointx[i])
-                    self.socket.key_in_y.append(480-r.keypointy[i])
+                    self.socket.key_x.append(r.keypointx[i])
+                    self.socket.key_y.append(480-r.keypointy[i])
+
                 self.socket.comp_ang_z()
 
             elif r.class_name == 'socket_open':
@@ -171,9 +166,9 @@ class Camera_subscriber(Node):
                 for i in [0, 1, 2, 3]:
                     self.socket.key_out_x.append(r.keypointx[i])
                     self.socket.key_out_y.append(480 - r.keypointy[i])
-                for i in [4, 5, 6, 7]:
-                    self.socket.key_in_x.append(r.keypointx[i])
-                    self.socket.key_in_y.append(480 - r.keypointy[i])
+                # for i in [4, 5, 6, 7]:
+                #     self.socket.key_in_x.append(r.keypointx[i])
+                #     self.socket.key_in_y.append(480 - r.keypointy[i])
                 self.socket.comp_ang_z()
 
         # This function will compute the orientation of the objects w.r.t. camera
