@@ -59,12 +59,53 @@ ament_target_dependencies(move_arm_class
 	interactive_markers
 	moveit_ros_planning
 	control_msgs
+	yolov8_msgs)
+
+
+
+add_executable(test_move
+    src/test_move.cpp)
+target_include_directories(test_move
+    PUBLIC include)
+ament_target_dependencies(test_move
+    ament_cmake
+	rclcpp
+	rclcpp_action
+	moveit_core
+	moveit_ros_planning_interface
+	interactive_markers
+	moveit_ros_planning
+	control_msgs
 	std_msgs)
+
+add_executable(move_arm_service
+    src/move_arm_service.cpp)
+target_include_directories(move_arm_service
+    PUBLIC include)
+ament_target_dependencies(move_arm_service
+    ament_cmake
+	rclcpp
+	rclcpp_action
+	moveit_core
+	moveit_ros_planning_interface
+	interactive_markers
+	moveit_ros_planning
+	control_msgs
+	std_msgs
+	yolov8_msgs)
+
+add_executable(move_sub src/move_sub.cpp)
+ament_target_dependencies(move_sub rclcpp std_msgs)
+
+
 
 # Install the executable
 install(TARGETS
 	move_arm
+	test_move
+	move_sub
 	move_arm_class
+	move_arm_service
     DESTINATION lib/${PROJECT_NAME}
 )
 # Install the launch file

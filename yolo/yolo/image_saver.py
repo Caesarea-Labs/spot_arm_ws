@@ -28,9 +28,7 @@ class chip:
         self.detected = False
         self.x = float("nan")
         self.y = float("nan")
-        self.ang_x = float("nan")
-        self.ang_y = float("nan")
-        self.ang_z = float("nan")
+        self.angs = 3*[float("nan")]
         self.key_x = 4*[float("nan")]
         self.key_y = 4*[float("nan")]
     def undetected(self):
