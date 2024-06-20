@@ -31,21 +31,23 @@ class MoveSpotArm : public rclcpp::Node {
                 group.setNamedTarget(request->pose_name.c_str());
                 bool good;
                 good = static_cast<bool>(group.plan(plan));
+                response->success = good;
                 if(good)
                     {
                      good = (group.execute(plan) == moveit::core::MoveItErrorCode::SUCCESS);
+                     RCLCPP_INFO(this->get_logger(),"Bitch, plan is %s",good ? "good" : "bad");
                      if (good){
                        RCLCPP_INFO(this->get_logger(),"Plan executed");
-                       return;
                      }
                      else{
                         RCLCPP_ERROR(this->get_logger(),"Failed to execute plan");
-                     }
+                         }
                     }
                     else{
                     RCLCPP_ERROR(this->get_logger(),"Failed to create plan");
                     }
-                response->success;
+                response->success = good;
+                return;
         }
 
 
