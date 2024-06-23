@@ -17,6 +17,9 @@ find_package(geometric_shapes REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(yolov8_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 
 if(BUILD_TESTING)
@@ -92,7 +95,11 @@ ament_target_dependencies(move_arm_service
 	moveit_ros_planning
 	control_msgs
 	std_msgs
-	yolov8_msgs)
+	yolov8_msgs
+	moveit_msgs
+	tf2
+	tf2_ros
+	geometry_msgs)
 
 add_executable(move_sub src/move_sub.cpp)
 ament_target_dependencies(move_sub rclcpp std_msgs)

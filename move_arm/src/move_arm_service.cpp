@@ -3,6 +3,12 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 #include "std_msgs/msg/string.hpp"
 #include "yolov8_msgs/srv/move.hpp"
+#include "geometry_msgs/msg/pose.hpp"
+#include "moveit_msgs/msg/robot_trajectory.hpp"
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
+#include "geometry_msgs/msg/transform_stamped.hpp"
+
 
 using namespace std::placeholders;
 using std::placeholders::_1;
@@ -19,12 +25,14 @@ class MoveSpotArm : public rclcpp::Node {
             cmd_service_ = this->create_service<yolov8_msgs::srv::Move>("move_srv",  std::bind(&MoveSpotArm::move_by_cmd_s, this, _1, _2));
             RCLCPP_INFO(this->get_logger(), "Subscription created");
             ptr =  std::shared_ptr<MoveSpotArm>(this);
+            tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
+            tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 //            MoveGroupInterface arm_g = MoveGroupInterface(ptr, "spot_arm");
         }
 
         void move_by_cmd_s(const std::shared_ptr<yolov8_msgs::srv::Move::Request> request,
         std::shared_ptr<yolov8_msgs::srv::Move::Response>  response) {
-
+            if (request->mode==0){ //Move to named poses
                 MoveGroupInterface group = MoveGroupInterface(ptr, request->group.c_str());
                 MoveGroupInterface::Plan plan;
                 group.setStartStateToCurrentState();
@@ -35,7 +43,6 @@ class MoveSpotArm : public rclcpp::Node {
                 if(good)
                     {
                      good = (group.execute(plan) == moveit::core::MoveItErrorCode::SUCCESS);
-                     RCLCPP_INFO(this->get_logger(),"Bitch, plan is %s",good ? "good" : "bad");
                      if (good){
                        RCLCPP_INFO(this->get_logger(),"Plan executed");
                      }
@@ -48,6 +55,75 @@ class MoveSpotArm : public rclcpp::Node {
                     }
                 response->success = good;
                 return;
+                }//mode==0
+            if (request->mode==1){ //Move to numeric pose
+                MoveGroupInterface group = MoveGroupInterface(ptr, request->group.c_str());
+                MoveGroupInterface::Plan plan;
+                group.setStartStateToCurrentState();
+                group.setPoseTarget(request->pose_t);
+                bool good;
+                good = static_cast<bool>(group.plan(plan));
+                response->success = good;
+                if(good)
+                    {
+                     good = (group.execute(plan) == moveit::core::MoveItErrorCode::SUCCESS);
+                     if (good){
+                       RCLCPP_INFO(this->get_logger(),"Plan executed");
+                     }
+                     else{
+                        RCLCPP_ERROR(this->get_logger(),"Failed to execute plan");
+                         }
+                    }
+                    else{
+                    RCLCPP_ERROR(this->get_logger(),"Failed to create plan");
+                    }
+                response->success = good;
+                return;
+                }//mode==1
+            if (request->mode==2){ //Move cartesian to numeric pose
+                RCLCPP_INFO(this->get_logger(), "Starting the Cartesian motion");
+
+                MoveGroupInterface group = MoveGroupInterface(ptr, request->group.c_str());
+
+//                group.setStartStateToCurrentState();
+
+                geometry_msgs::msg::TransformStamped transform_stamped = tf_buffer_->lookupTransform("body", "arm_link_wr1", tf2::TimePointZero);
+                geometry_msgs::msg::Pose start_pose;
+                start_pose.position.x = transform_stamped.transform.translation.x;
+                start_pose.position.y = transform_stamped.transform.translation.y;
+                start_pose.position.z = transform_stamped.transform.translation.z;
+                start_pose.orientation.x = transform_stamped.transform.rotation.z;
+                start_pose.orientation.y = transform_stamped.transform.rotation.y;
+                start_pose.orientation.z = transform_stamped.transform.rotation.z;
+                start_pose.orientation.w = transform_stamped.transform.rotation.w;
+
+                std::vector<geometry_msgs::msg::Pose> waypoints;
+                waypoints.push_back(start_pose);
+                waypoints.push_back(request->pose_t);
+                moveit_msgs::msg::RobotTrajectory trajectory;
+                const double jump_threshold = 0.0;
+                const double eef_step = 0.01;
+                bool good;
+                RCLCPP_INFO(this->get_logger(), "Sending to planner");
+                good = static_cast<bool>(group.computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory));
+                if(good)
+                    {
+                     MoveGroupInterface::Plan plan;
+                     plan.trajectory_ = trajectory;
+                     good = (group.execute(plan) == moveit::core::MoveItErrorCode::SUCCESS);
+                     if (good){
+                       RCLCPP_INFO(this->get_logger(),"Plan executed");
+                     }
+                     else{
+                        RCLCPP_ERROR(this->get_logger(),"Failed to execute plan");
+                         }
+                    }
+                    else{
+                    RCLCPP_ERROR(this->get_logger(),"Failed to create plan");
+                    }
+                response->success = good;
+                return;
+                }//mode==2
         }
 
 
@@ -89,6 +165,8 @@ class MoveSpotArm : public rclcpp::Node {
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr cmd_subscription_;
         rclcpp::Node::SharedPtr ptr;
         rclcpp::Service<yolov8_msgs::srv::Move>::SharedPtr cmd_service_;
+        std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+        std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
 };
 
