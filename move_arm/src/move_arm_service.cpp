@@ -32,6 +32,7 @@ class MoveSpotArm : public rclcpp::Node {
 
         void move_by_cmd_s(const std::shared_ptr<yolov8_msgs::srv::Move::Request> request,
         std::shared_ptr<yolov8_msgs::srv::Move::Response>  response) {
+//            rclcpp::Duration large_timeout = rclcpp::Duration::from_seconds(1e9);  // Effectively "disabling" the timeout
             if (request->mode==0){ //Move to named poses
                 MoveGroupInterface group = MoveGroupInterface(ptr, request->group.c_str());
                 MoveGroupInterface::Plan plan;

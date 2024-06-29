@@ -101,8 +101,27 @@ ament_target_dependencies(move_arm_service
 	tf2_ros
 	geometry_msgs)
 
-add_executable(move_sub src/move_sub.cpp)
-ament_target_dependencies(move_sub rclcpp std_msgs)
+add_executable(cns_task
+    src/chip_socket_task.cpp)
+
+target_include_directories(cns_task
+    PUBLIC include)
+ament_target_dependencies(cns_task
+    ament_cmake
+	rclcpp
+	rclcpp_action
+	moveit_core
+	moveit_ros_planning_interface
+	interactive_markers
+	moveit_ros_planning
+	control_msgs
+	std_msgs
+	yolov8_msgs
+	moveit_msgs
+	tf2
+	tf2_ros
+	geometry_msgs)
+
 
 
 
@@ -110,9 +129,9 @@ ament_target_dependencies(move_sub rclcpp std_msgs)
 install(TARGETS
 	move_arm
 	test_move
-	move_sub
 	move_arm_class
 	move_arm_service
+	cns_task
     DESTINATION lib/${PROJECT_NAME}
 )
 # Install the launch file

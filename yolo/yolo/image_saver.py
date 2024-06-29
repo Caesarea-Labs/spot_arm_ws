@@ -147,7 +147,7 @@ class Camera_subscriber(Node):
         # cv2.destroyAllWindows()
         # cv2.imwrite('sample_out_1.png', img)
         # self.YOLO_pub.publish(bridge.cv2_to_imgmsg(res_img,'bgr8'))
-        results_pose = self.model_pose(img)
+        results_pose = self.model_pose(img, verbose=False)
         self.chip.undetected()
         self.socket.undetected()
 
@@ -185,8 +185,8 @@ class Camera_subscriber(Node):
 
     def timer_callback(self):
         # Setting the Chip
-        if self.chip.detected == True:
-            self.ws_state.chip.detected = True
+        self.ws_state.chip.detected = self.chip.detected
+        if self.chip.detected:
             self.ws_state.chip.c_x = self.chip.x
             self.ws_state.chip.c_y = self.chip.y
             for i in range(3):
@@ -194,11 +194,10 @@ class Camera_subscriber(Node):
             for i in range(4):
                 self.ws_state.chip.key_x[i] = self.chip.key_x[i]
                 self.ws_state.chip.key_y[i] = self.chip.key_y[i]
-        else:
-            self.ws_state.chip.detected = False
 
-        if self.socket.detected == True:
-            self.ws_state.socket.detected = True
+
+        self.ws_state.socket.detected = self.socket.detected
+        if self.socket.detected:
             self.ws_state.socket.c_x = self.socket.x
             self.ws_state.socket.c_y = self.socket.y
             for i in range(3):
@@ -210,8 +209,6 @@ class Camera_subscriber(Node):
             for i in range(4):
                 self.ws_state.socket.key_x[i] = self.socket.key_x[i]
                 self.ws_state.socket.key_y[i] = self.socket.key_y[i]
-        else:
-            self.ws_state.socket.detected = False
 
         self.ws_state.tof = float(self.TOF_dist)
         self.est_res.publish(self.ws_state)

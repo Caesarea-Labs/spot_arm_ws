@@ -27,57 +27,43 @@ bridge = CvBridge()
 class chip:
     def __init__(self):
         self.detected = False
-        self.pose_detected = False
         self.x = float("nan")
         self.y = float("nan")
-        self.ang_x = float("nan")
-        self.ang_y = float("nan")
-        self.ang_z = float("nan")
+        self.angs = 3*[float("nan")]
         self.key_x = 4*[float("nan")]
         self.key_y = 4*[float("nan")]
     def undetected(self):
         self.detected = False
-        self.pose_detected = False
         self.x = float("nan")
         self.y = float("nan")
-        self.ang_x = float("nan")
-        self.ang_y = float("nan")
-        self.ang_z = float("nan")
+        self.angs = 3*[float("nan")]
         self.key_x = 4 * [float("nan")]
         self.key_y = 4 * [float("nan")]
     def comp_ang_z(self):
-        self.ang_z=np.arctan2(self.key_y[3]-self.key_y[0],self.key_x[3]-self.key_x[0])
+        self.angs[2]=np.arctan2(self.key_y[3]-self.key_y[0],self.key_x[3]-self.key_x[0])
 
 class socket:
     def __init__(self):
         self.detected = False
-        self.pose_detected = False
         self.x = float("nan")
         self.y = float("nan")
         self.state = "unknown"
-        self.ang_x = float("nan")
-        self.ang_y = float("nan")
-        self.ang_z = float("nan")
-        self.state = 'unknown'
+        self.angs = 3*[float("nan")]
         self.key_x = 4 * [float("nan")]
         self.key_y = 4 * [float("nan")]
 
 
     def undetected(self):
         self.detected = False
-        self.pose_detected = False
         self.x = float("nan")
         self.y = float("nan")
         self.state = "unknown"
-        self.ang_x = float("nan")
-        self.ang_y = float("nan")
-        self.ang_z = float("nan")
-        self.state = 'unknown'
+        self.angs = 3*[float("nan")]
         self.key_x = 4 * [float("nan")]
         self.key_y = 4 * [float("nan")]
 
     def comp_ang_z(self):
-        self.ang_z=np.arctan2(self.key_y[3]-self.key_y[0],self.key_x[3]-self.key_x[0])
+        self.angs[2] = np.arctan2(self.key_y[3]-self.key_y[0],self.key_x[3]-self.key_x[0])
 
 class Camera_subscriber(Node):
 
@@ -240,56 +226,6 @@ class Camera_subscriber(Node):
 
         self.ws_state.tof = float(self.TOF_dist)
         self.est_res.publish(self.ws_state)
-
-
-
-
-
-    # def camera_callback(self, data):
-    #     global img
-    #     img = bridge.imgmsg_to_cv2(data, 'bgr8')
-    #     results = self.model_detection(img)
-    #     self.yolov8_inference.header.frame_id = "inference"
-    #     self.yolov8_inference.header.stamp = self.get_clock().now().to_msg()
-    #     self.poseinference.header.frame_id = 'pose_inference'
-    #     self.poseinference.header.stamp = self.get_clock().now().to_msg()
-    #
-    #     for r in results:
-    #         boxes = r.boxes
-    #         for box in boxes:
-    #             self.inference_result = InferenceResult()
-    #             b = box.xyxy[0].to('cpu').detach().numpy().copy()  # get box coordinates in (top, left, bottom, right) format
-    #             c = box.cls
-    #             self.inference_result.class_name = self.model_names[int(c)]
-    #             self.inference_result.top = int(b[0])
-    #             self.inference_result.left = int(b[1])
-    #             self.inference_result.bottom = int(b[2])
-    #             self.inference_result.right = int(b[3])
-    #             self.yolov8_inference.yolov8_inference.append(self.inference_result)
-    #
-    #     self.yolov8_pub.publish(self.yolov8_inference)
-    #     self.yolov8_inference.yolov8_inference.clear()
-    #     res_img = results[0].plot()
-    #     # res_img = cv2.cvtColor(res_img, cv2.COLOR_BGR2HSV)
-    #     # print(data.height,data.width, data.encoding)
-    #     # cv2.imshow('spot_head_camera', img)
-    #     # cv2.waitKey(20)
-    #     # cv2.destroyAllWindows()
-    #     # cv2.imwrite('sample_out_1.png', img)
-    #     # self.YOLO_pub.publish(bridge.cv2_to_imgmsg(res_img,'bgr8'))
-    #     results_pose = self.model_pose(img)
-    #     for c in range(len(results_pose[0].boxes.cls)):
-    #         self.pose_result = Poseresults()
-    #         self.pose_result.class_name = results_pose[0].names[int(results_pose[0].boxes.cls[c].numpy())]
-    #         self.pose_result.box = results_pose[0].boxes.xyxy[c,:].to('cpu').detach().numpy().copy().astype(int)
-    #         self.pose_result.keypointx = results_pose[0].keypoints.xy[c, :, 0].to('cpu').detach().numpy().copy().astype(int)
-    #         self.pose_result.keypointy = results_pose[0].keypoints.xy[c, :, 1].to('cpu').detach().numpy().copy().astype(int)
-    #         self.poseinference.pose_inference.append(self.pose_result)
-    #
-    #     self.pose_pub.publish(self.poseinference)
-    #     self.poseinference.pose_inference.clear()
-    #     # res_pose = results_pose[0].plot()
-    #     # self.YOLO_pub.publish(bridge.cv2_to_imgmsg(res_pose, 'bgr8'))
 
 
 
