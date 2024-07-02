@@ -126,11 +126,13 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             RCLCPP_INFO(this->get_logger(),"End scan for chip phaze");
             RCLCPP_INFO(this->get_logger(),"Move to chip");
             Move_2_element(1);
-            socket.world_detected=false;
-            Scan_WS(2);
-            RCLCPP_INFO(this->get_logger(),"End scan for socket phaze");
-            RCLCPP_INFO(this->get_logger(),"Move to socket");
-            Move_2_element(2);
+            Align_orientation(1);
+//            socket.world_detected=false;
+//            Scan_WS(2);
+//            RCLCPP_INFO(this->get_logger(),"End scan for socket phaze");
+//            RCLCPP_INFO(this->get_logger(),"Move to socket");
+//            Move_2_element(2);
+//            Align_orientation(2);
 
         }
         void Start_up(){
@@ -601,16 +603,16 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             request->mode =1;
             request->pose_t.position.x = x ;
             request->pose_t.position.y = y;
-            request->pose_t.position.z = z + 0.3 ;//First number in the correction TOF sensor->end_gripper
+            request->pose_t.position.z = z + 0.4 ;//First number in the correction TOF sensor->end_gripper
             request->pose_t.orientation = grip_orientation_t;
+            RCLCPP_INFO(this->get_logger(),"Aligning griper with element");
             good=false;
-                    while (!good){
-                        good = Send_request(request);
-                        while(request_sent_time>=request_returned_time){
-                            rclcpp::sleep_for(500ms);
-                            }
-                        }
-
+            while (!good){
+                good = Send_request(request);
+                while(request_sent_time>=request_returned_time){
+                    rclcpp::sleep_for(500ms);
+                    }
+                }
             }
         bool Check_exit(const int element){
             if(element==1){
@@ -624,6 +626,56 @@ class CnS_Task_SpotArm : public rclcpp::Node {
                 }
             }
             return false;
+        }
+        void Align_orientation(const int element){
+            double theta=0;
+            bool good=false;
+            if(element==1){
+                theta = atan2(chip.key_points[1][1] - chip.key_points[1][0], chip.key_points[0][1] - chip.key_points[0][0]);
+            } else if (element==2){
+                theta = atan2(socket.key_points[1][1] - socket.key_points[1][0], socket.key_points[0][1] - socket.key_points[0][0]);
+            }
+            theta -= 3.14159/2;
+            Get_grip_pos();
+            auto grip_orientation_t = grip_orientation;
+            tf2::Quaternion q_orig, q_rot, q_new;
+            tf2::convert(grip_orientation_t, q_orig);
+            RCLCPP_INFO(this->get_logger(),"Theta angel is %2f",theta);
+            q_rot.setRPY(0.0, 0.0, theta);//Define the needed rotation to allign with element
+            q_new = q_rot * q_orig; //Computing the new orientation
+            q_new.normalize();
+            grip_orientation_t = tf2::toMsg(q_new);//Moving to message format
+            //Define the request
+            auto request = std::make_shared<yolov8_msgs::srv::Move::Request>();
+            request->group = "spot_arm";
+            request->mode =1;
+            request->pose_t.position.x = grip_pos.x ;
+            request->pose_t.position.y = grip_pos.y;
+            request->pose_t.position.z = grip_pos.z;//First number in the correction TOF sensor->end_gripper
+            request->pose_t.orientation = grip_orientation_t;
+            good=false;
+            while (!good){
+                good = Send_request(request);
+                while(request_sent_time>=request_returned_time){
+                    rclcpp::sleep_for(500ms);
+                    }
+                }
+            rclcpp::sleep_for(1000ms);
+            RCLCPP_INFO(this->get_logger(),"New detection");
+
+             if(element==1){
+                theta = atan2(chip.key_points[1][1] - chip.key_points[1][0], chip.key_points[0][1] - chip.key_points[0][0]);
+            } else if (element==2){
+                theta = atan2(socket.key_points[1][1] - socket.key_points[1][0], socket.key_points[0][1] - socket.key_points[0][0]);
+            }
+            theta -= 3.14159/2;
+            RCLCPP_INFO(this->get_logger(),"The corrected angle is %f",theta);
+            if (abs(theta)>0.02){
+                Align_orientation(element);
+                }
+
+
+
         }
 
         rclcpp::Subscription<yolov8_msgs::msg::Ws>::SharedPtr Perception_sub_;//subscription to the perception node

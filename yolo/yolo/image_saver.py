@@ -82,7 +82,7 @@ class Camera_subscriber(Node):
         # Displaying the image
         # model_file_detection = os.path.join(get_package_share_directory('yolo'),'models','best_detect.onnx')
         # self.model_detection = YOLO(model_file_detection,task='detect')
-        model_file_pose = os.path.join(get_package_share_directory('yolo'), 'models', 'best.onnx')
+        model_file_pose = os.path.join(get_package_share_directory('yolo'), 'models', 'best_C.onnx')
         self.model_pose = YOLO(model_file_pose,task='pose')
         self.yolov8_inference = Yolov8Inference()
         self.poseinference = Poseinference()
@@ -98,7 +98,7 @@ class Camera_subscriber(Node):
         print('All good, node started')
         self.TOF_dist = 100
         global img
-        # self.YOLO_pub = self.create_publisher(Image,"/detection_results",1)
+        self.YOLO_pub = self.create_publisher(Image,"/detection_results",1)
         # self.yolov8_pub = self.create_publisher(Yolov8Inference, "/Yolov8_Inference", 1)
 
         self.model_names=['chip','socket']
@@ -180,8 +180,8 @@ class Camera_subscriber(Node):
 
         # self.pose_pub.publish(self.poseinference)
         # self.poseinference.pose_inference.clear()
-        # res_pose = results_pose[0].plot()
-        # self.YOLO_pub.publish(bridge.cv2_to_imgmsg(res_pose, 'bgr8'))
+        res_pose = results_pose[0].plot()
+        self.YOLO_pub.publish(bridge.cv2_to_imgmsg(res_pose, 'bgr8'))
 
     def timer_callback(self):
         # Setting the Chip
