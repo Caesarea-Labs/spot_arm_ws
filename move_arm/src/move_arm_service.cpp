@@ -56,7 +56,7 @@ class MoveSpotArm : public rclcpp::Node {
                     }
                 response->success = good;
                 return;
-                }//mode==0
+                }//mode==0 named position
             if (request->mode==1){ //Move to numeric pose
                 MoveGroupInterface group = MoveGroupInterface(ptr, request->group.c_str());
                 MoveGroupInterface::Plan plan;
@@ -80,7 +80,7 @@ class MoveSpotArm : public rclcpp::Node {
                     }
                 response->success = good;
                 return;
-                }//mode==1
+                }//mode==1 numeric position
             if (request->mode==2){ //Move cartesian to numeric pose
                 RCLCPP_INFO(this->get_logger(), "Starting the Cartesian motion");
 
@@ -124,7 +124,54 @@ class MoveSpotArm : public rclcpp::Node {
                     }
                 response->success = good;
                 return;
-                }//mode==2
+                }//mode==2 trajectory
+            if (request->mode==3){ //Move cartesian to numeric pose
+                RCLCPP_INFO(this->get_logger(), "Moving to joint positions");
+                //Define the move group
+                MoveGroupInterface group = MoveGroupInterface(ptr, request->group.c_str());
+//                moveit::core::RobotStatePtr current_state = group.getCurrentState(10);
+//                const moveit::core::JointModelGroup* joint_model_group =
+//                        group.getCurrentState()->getJointModelGroup(request->group.c_str());
+
+                std::vector<double> joint_group_positions;
+//                current_state->copyJointGroupPositions(joint_model_group, joint_group_positions);
+
+//                if(request->group.c_str() == "spot_arm"){
+                    for(int i=0; i<6; i++){
+                        joint_group_positions.push_back(request->joint[i]);
+                        RCLCPP_INFO(this->get_logger(),"Setting Joint %d pos %f",i,request->joint[i]);
+                    }
+//                }
+
+                //change the joint positions
+                RCLCPP_INFO(this->get_logger(),"Setting the joint positions");
+                group.setJointValueTarget(joint_group_positions);
+                //Set Velocity and acceleration factors
+                group.setStartStateToCurrentState();
+                group.setMaxVelocityScalingFactor(0.05);
+                group.setMaxAccelerationScalingFactor(0.05);
+                //Define the plan
+                RCLCPP_INFO(this->get_logger(),"Planning the Joints");
+                MoveGroupInterface::Plan plan;
+                //Planning
+                bool good = (group.plan(plan) == moveit::core::MoveItErrorCode::SUCCESS);
+                //Executing
+                if(good)
+                    {
+                     good = (group.execute(plan) == moveit::core::MoveItErrorCode::SUCCESS);
+                     if (good){
+                       RCLCPP_INFO(this->get_logger(),"Plan executed");
+                     }
+                     else{
+                        RCLCPP_ERROR(this->get_logger(),"Failed to execute plan");
+                         }
+                    }
+                    else{
+                    RCLCPP_ERROR(this->get_logger(),"Failed to create plan");
+                    }
+                response->success = good;
+                return;
+                }//mode==3 robot joint positions TOFIX --no current model loaded
         }
 
 

@@ -91,7 +91,7 @@ def generate_launch_description():
                    '-entity','spot',
                    '-x', '0.0',
                    '-z', '1.0',
-                   '-y', '1.1',
+                   '-y', '0.9',
                    '-Y', '-1.57'
                    ],
         # world= os.path.join(package_description_path, "worlds/outdoor.world"),

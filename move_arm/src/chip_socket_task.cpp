@@ -6,6 +6,7 @@
 #include "yolov8_msgs/srv/move.hpp"
 #include "yolov8_msgs/msg/ws.hpp"
 #include "geometry_msgs/msg/pose.hpp"
+#include "sensor_msgs/msg/joint_state.hpp"
 #include "moveit_msgs/msg/robot_trajectory.hpp"
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
@@ -42,6 +43,9 @@ class WS_obj {
     float x_pic, y_pic;
     float x_world,y_world, z_world, theta;
     float key_points[2][4];
+    float joints_pos[9];
+    geometry_msgs::msg::Point grip_pos;
+    geometry_msgs::msg::Quaternion grip_orientation;
     private:
 
 };
@@ -58,6 +62,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             member_cb_group_ = client_cb_group_;
             //Creating the subscription to the perception topic
             Perception_sub_ = this->create_subscription<yolov8_msgs::msg::Ws>("/Ws_res", 10, std::bind(&CnS_Task_SpotArm::Estimate, this, _1));
+            Joints_sub_ = this->create_subscription<sensor_msgs::msg::JointState>("/joint_states", 10, std::bind(&CnS_Task_SpotArm::Log_Joints, this, _1));
             RCLCPP_INFO(this->get_logger(), "Perception Subscription created");
             // The following (Cmd_sub_) is only for testing
             auto subscription_options = rclcpp::SubscriptionOptions();
@@ -77,6 +82,11 @@ class CnS_Task_SpotArm : public rclcpp::Node {
         }
     private:
 
+        void Log_Joints(const sensor_msgs::msg::JointState::SharedPtr data){
+            for(int i=0; i<9;i++){
+                joints[i]=data->position[i];
+            }
+        }
         void Estimate(const yolov8_msgs::msg::Ws::SharedPtr data) {
             // This function updates the perception
             if (data->chip.detected){
@@ -127,12 +137,23 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             RCLCPP_INFO(this->get_logger(),"Move to chip");
             Move_2_element(1);
             Align_orientation(1);
-//            socket.world_detected=false;
-//            Scan_WS(2);
-//            RCLCPP_INFO(this->get_logger(),"End scan for socket phaze");
-//            RCLCPP_INFO(this->get_logger(),"Move to socket");
-//            Move_2_element(2);
-//            Align_orientation(2);
+            Save_joints(1);
+            Save_Pos(1);
+
+
+            socket.world_detected=false;
+            RCLCPP_INFO(this->get_logger(),"Start scan for chip phaze");
+            Scan_WS(2);
+            RCLCPP_INFO(this->get_logger(),"End scan for socket phaze");
+            RCLCPP_INFO(this->get_logger(),"Move to socket");
+            Move_2_element(2);
+            Align_orientation(2);
+            Save_Pos(2);
+            Move_2_Pos(1);
+            rclcpp::sleep_for(1000ms);
+            Move_2_Pos(2);
+            Move_2_joints(1);
+
 
         }
         void Start_up(){
@@ -670,15 +691,83 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             }
             theta -= 3.14159/2;
             RCLCPP_INFO(this->get_logger(),"The corrected angle is %f",theta);
-            if (abs(theta)>0.02){
+            if (abs(theta)>0.03){
                 Align_orientation(element);
                 }
 
 
 
         }
+        void Save_joints(const int element){
+
+            if(element==1){//chip
+                for(int i=0; i<9; i++){
+                    chip.joints_pos[i]=joints[i];
+                    RCLCPP_INFO(this->get_logger(),"Joint %d pos %f",i,chip.joints_pos[i]);
+                }
+            }else if(element==2){
+                for(int i=0; i<9;i++){
+                    socket.joints_pos[i]=joints[i];
+                }
+                }
+                RCLCPP_INFO(this->get_logger(),"Position saved");
+            }
+        void Save_Pos(const int element){
+            Get_grip_pos();
+            if(element==1){//chip
+                chip.grip_pos = grip_pos;
+                chip.grip_orientation = grip_orientation;
+            }else if(element==2){
+                socket.grip_pos = grip_pos;
+                socket.grip_orientation = grip_orientation;
+                }
+                RCLCPP_INFO(this->get_logger(),"Position saved");
+            }
+        void Move_2_joints(const int element){
+            auto request = std::make_shared<yolov8_msgs::srv::Move::Request>();
+            request->group = "spot_arm";
+            request->mode = 3;
+            if(element==1){
+                for(int i=0; i<6; i++){
+                    request->joint[i]=chip.joints_pos[i];
+                }
+            }else if(element==2){
+                for(int i=0; i<6; i++){
+                    request->joint[i]=socket.joints_pos[i];
+                    }
+                }
+            RCLCPP_INFO(this->get_logger(),"Sending Joint request");
+            bool good=false;
+            while (!good){
+                good = Send_request(request);
+                while(request_sent_time>=request_returned_time){
+                    rclcpp::sleep_for(500ms);
+                    }
+                }
+        }//Move_2_Joints
+        void Move_2_Pos(const int element){
+            auto request = std::make_shared<yolov8_msgs::srv::Move::Request>();
+            request->group = "spot_arm";
+            request->mode = 1;
+            if (element==1){
+                request->pose_t.position = chip.grip_pos;
+                request->pose_t.orientation = chip.grip_orientation;
+            }else if (element==2){
+                request->pose_t.position = socket.grip_pos;
+                request->pose_t.orientation = socket.grip_orientation;
+            }
+            bool good=false;
+            while (!good){
+                good = Send_request(request);
+                while(request_sent_time>=request_returned_time){
+                    rclcpp::sleep_for(500ms);
+                    }
+                }
+        }//Move_2_Joints
+
 
         rclcpp::Subscription<yolov8_msgs::msg::Ws>::SharedPtr Perception_sub_;//subscription to the perception node
+        rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr Joints_sub_;//subscription to the perception node
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr Cmd_sub_;// This (Cmd_sub_) is only for testing
         rclcpp::Node::SharedPtr ptr;
         rclcpp::Client<yolov8_msgs::srv::Move>::SharedPtr move_client_;
@@ -692,11 +781,10 @@ class CnS_Task_SpotArm : public rclcpp::Node {
         rclcpp::CallbackGroup::SharedPtr client_cb_group_;
         rclcpp::CallbackGroup::SharedPtr member_cb_group_;
         WS_obj chip, socket;
-
-
-
+        double joints[9];
 
 };
+
 
 int main(int argc, char **argv)
 {

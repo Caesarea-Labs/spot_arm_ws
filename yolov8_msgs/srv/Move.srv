@@ -2,6 +2,10 @@ string group
 int64 mode
 string pose_name
 geometry_msgs/Pose pose_t
+float64[6] joint
+float64[20] traj_x
+float64[20] traj_y
+float64[20] traj_z
 
 ---
 bool success
