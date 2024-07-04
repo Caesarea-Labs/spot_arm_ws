@@ -20,6 +20,7 @@ find_package(yolov8_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(linkattacher_msgs REQUIRED)
 
 
 if(BUILD_TESTING)
@@ -122,7 +123,8 @@ ament_target_dependencies(cns_task
 	std_srvs
 	tf2
 	tf2_ros
-	geometry_msgs)
+	geometry_msgs
+	linkattacher_msgs)
 
 
 

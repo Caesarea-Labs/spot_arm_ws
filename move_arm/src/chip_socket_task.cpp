@@ -12,6 +12,8 @@
 #include "tf2_ros/transform_listener.h"
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "std_srvs/srv/set_bool.hpp"
+#include "linkattacher_msgs/srv/attach_link.hpp"
+#include "linkattacher_msgs/srv/detach_link.hpp"
 #include <chrono>
 #include <cstdlib>
 #include <memory>
@@ -81,12 +83,17 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             request_returned_time = this->get_clock()->now().seconds();
             request_sent_time_sc = this->get_clock()->now().seconds();
             request_returned_time_sc = this->get_clock()->now().seconds();
+            request_sent_time_at = this->get_clock()->now().seconds();
+            request_returned_time_at = this->get_clock()->now().seconds();
             TOF=0;
             // Creating the client for the suction cups
             sc1_client_ = this->create_client<std_srvs::srv::SetBool>("/custom_switch1", rmw_qos_profile_services_default, client_cb_group_);
             sc2_client_ = this->create_client<std_srvs::srv::SetBool>("/custom_switch2", rmw_qos_profile_services_default, client_cb_group_);
             sc3_client_ = this->create_client<std_srvs::srv::SetBool>("/custom_switch3", rmw_qos_profile_services_default, client_cb_group_);
             sc4_client_ = this->create_client<std_srvs::srv::SetBool>("/custom_switch4", rmw_qos_profile_services_default, client_cb_group_);
+            // Creating the clients for link detacher--attacher
+            attach_client_ = this->create_client<linkattacher_msgs::srv::AttachLink>("/ATTACHLINK", rmw_qos_profile_services_default, client_cb_group_);
+            detach_client_ = this->create_client<linkattacher_msgs::srv::DetachLink>("/DETACHLINK", rmw_qos_profile_services_default, client_cb_group_);
 
 
 //            MoveGroupInterface arm_g = MoveGroupInterface(ptr, "spot_arm");
@@ -164,10 +171,13 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             Move_2_Pos(1);
             RCLCPP_INFO(this->get_logger(),"Activating the SC");
             Activate_SC();
+            rclcpp::sleep_for(500ms);
+            Attach();
 //            rclcpp::sleep_for(1000ms);
             RCLCPP_INFO(this->get_logger(),"Moving to pose 2");
             Move_2_Pos(2);
             RCLCPP_INFO(this->get_logger(),"Activating the SC");
+            Detach();
             DeActivate_SC();
             Move_2_joints(1);
 
@@ -828,6 +838,74 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             return service_result_;
 
         }
+        void Attach(){
+            auto request = std::make_shared<linkattacher_msgs::srv::AttachLink::Request>();
+            request->model1_name = "spot";
+            request->link1_name = "left_finger_link";
+            request->model2_name = "Chip";
+            request->link2_name = "link_7";
+            bool good=false;
+            while (!good){
+                good = Send_request_AT(request);
+                while(request_sent_time_at>=request_returned_time_at){
+                    rclcpp::sleep_for(500ms);
+                    }
+                }
+        }
+        bool Send_request_AT(const auto request){
+            using ServiceResponseFuture = rclcpp::Client<linkattacher_msgs::srv::AttachLink>::SharedFuture;
+            auto response_received_callback = [this](ServiceResponseFuture future) {
+                auto response = future.get();
+                request_returned_time_at = this->get_clock()->now().seconds();
+                if (response->success){
+//                    RCLCPP_INFO(this->get_logger(), "DONE"); // Change this to your response field
+                    }
+                service_result_at_=response->success;
+                request_returned_time_at = this->get_clock()->now().seconds();
+
+            };
+            request_sent_time_at = this->get_clock()->now().seconds();
+            RCLCPP_INFO(this->get_logger(),"Sending Attach");
+            auto future = attach_client_->async_send_request(request, response_received_callback);
+
+
+            return service_result_at_;
+
+        }
+        void Detach(){
+            auto request = std::make_shared<linkattacher_msgs::srv::DetachLink::Request>();
+            request->model1_name = "spot";
+            request->link1_name = "left_finger_link";
+            request->model2_name = "Chip";
+            request->link2_name = "link_7";
+            bool good=false;
+            while (!good){
+                good = Send_request_De(request);
+                while(request_sent_time_at>=request_returned_time_at){
+                    rclcpp::sleep_for(500ms);
+                    }
+                }
+        }
+        bool Send_request_De(const auto request){
+            using ServiceResponseFuture = rclcpp::Client<linkattacher_msgs::srv::DetachLink>::SharedFuture;
+            auto response_received_callback = [this](ServiceResponseFuture future) {
+                auto response = future.get();
+                request_returned_time_at = this->get_clock()->now().seconds();
+                if (response->success){
+//                    RCLCPP_INFO(this->get_logger(), "DONE"); // Change this to your response field
+                    }
+                service_result_at_=response->success;
+                request_returned_time_at = this->get_clock()->now().seconds();
+
+            };
+            request_sent_time_at = this->get_clock()->now().seconds();
+            RCLCPP_INFO(this->get_logger(),"Sending Detach");
+            auto future = detach_client_->async_send_request(request, response_received_callback);
+
+
+            return service_result_at_;
+
+        }
 
 
         rclcpp::Subscription<yolov8_msgs::msg::Ws>::SharedPtr Perception_sub_;//subscription to the perception node
@@ -839,13 +917,17 @@ class CnS_Task_SpotArm : public rclcpp::Node {
         rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr sc2_client_;
         rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr sc3_client_;
         rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr sc4_client_;
+        rclcpp::Client<linkattacher_msgs::srv::AttachLink>::SharedPtr attach_client_;
+        rclcpp::Client<linkattacher_msgs::srv::DetachLink>::SharedPtr detach_client_;
         std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
         std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
         geometry_msgs::msg::Point grip_pos;
         geometry_msgs::msg::Quaternion grip_orientation;
-        bool service_result_, service_result_sc_;
+        bool service_result_, service_result_sc_,service_result_at_,service_result_de_;
         double request_sent_time, request_returned_time ;
         double request_sent_time_sc, request_returned_time_sc ;
+        double request_sent_time_at, request_returned_time_at ;
+        double request_sent_time_de, request_returned_time_de ;
         double TOF;
         rclcpp::CallbackGroup::SharedPtr client_cb_group_;
         rclcpp::CallbackGroup::SharedPtr member_cb_group_;
