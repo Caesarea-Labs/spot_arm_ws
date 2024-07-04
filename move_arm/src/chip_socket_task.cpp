@@ -11,6 +11,7 @@
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 #include "geometry_msgs/msg/transform_stamped.hpp"
+#include "std_srvs/srv/set_bool.hpp"
 #include <chrono>
 #include <cstdlib>
 #include <memory>
@@ -75,9 +76,19 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
             tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
             service_result_ = false;
+            service_result_sc_ = false;
             request_sent_time = this->get_clock()->now().seconds();
             request_returned_time = this->get_clock()->now().seconds();
+            request_sent_time_sc = this->get_clock()->now().seconds();
+            request_returned_time_sc = this->get_clock()->now().seconds();
             TOF=0;
+            // Creating the client for the suction cups
+            sc1_client_ = this->create_client<std_srvs::srv::SetBool>("/custom_switch1", rmw_qos_profile_services_default, client_cb_group_);
+            sc2_client_ = this->create_client<std_srvs::srv::SetBool>("/custom_switch2", rmw_qos_profile_services_default, client_cb_group_);
+            sc3_client_ = this->create_client<std_srvs::srv::SetBool>("/custom_switch3", rmw_qos_profile_services_default, client_cb_group_);
+            sc4_client_ = this->create_client<std_srvs::srv::SetBool>("/custom_switch4", rmw_qos_profile_services_default, client_cb_group_);
+
+
 //            MoveGroupInterface arm_g = MoveGroupInterface(ptr, "spot_arm");
         }
     private:
@@ -141,17 +152,23 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             Save_Pos(1);
 
 
+
             socket.world_detected=false;
             RCLCPP_INFO(this->get_logger(),"Start scan for chip phaze");
             Scan_WS(2);
             RCLCPP_INFO(this->get_logger(),"End scan for socket phaze");
             RCLCPP_INFO(this->get_logger(),"Move to socket");
             Move_2_element(2);
-            Align_orientation(2);
+//            Align_orientation(2);
             Save_Pos(2);
             Move_2_Pos(1);
-            rclcpp::sleep_for(1000ms);
+            RCLCPP_INFO(this->get_logger(),"Activating the SC");
+            Activate_SC();
+//            rclcpp::sleep_for(1000ms);
+            RCLCPP_INFO(this->get_logger(),"Moving to pose 2");
             Move_2_Pos(2);
+            RCLCPP_INFO(this->get_logger(),"Activating the SC");
+            DeActivate_SC();
             Move_2_joints(1);
 
 
@@ -401,7 +418,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
 
         }
         bool Send_request(const auto request){
-        using ServiceResponseFuture = rclcpp::Client<yolov8_msgs::srv::Move>::SharedFuture;
+            using ServiceResponseFuture = rclcpp::Client<yolov8_msgs::srv::Move>::SharedFuture;
             auto response_received_callback = [this](ServiceResponseFuture future) {
                 auto response = future.get();
                 request_returned_time = this->get_clock()->now().seconds();
@@ -624,7 +641,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             request->mode =1;
             request->pose_t.position.x = x ;
             request->pose_t.position.y = y;
-            request->pose_t.position.z = z + 0.4 ;//First number in the correction TOF sensor->end_gripper
+            request->pose_t.position.z = z + 0.3 ;//First number in the correction TOF sensor->end_gripper
             request->pose_t.orientation = grip_orientation_t;
             RCLCPP_INFO(this->get_logger(),"Aligning griper with element");
             good=false;
@@ -764,6 +781,53 @@ class CnS_Task_SpotArm : public rclcpp::Node {
                     }
                 }
         }//Move_2_Joints
+        void Activate_SC(){
+            auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
+            request->data = true;
+            bool good=false;
+            while (!good){
+                good = Send_request_SC(request);
+                while(request_sent_time_sc>=request_returned_time_sc){
+                    rclcpp::sleep_for(500ms);
+                    }
+                }
+        }
+        void DeActivate_SC(){
+            auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
+            request->data = false;
+            bool good=false;
+            while (!good){
+                good = Send_request_SC(request);
+                while(request_sent_time_sc>=request_returned_time_sc){
+                    rclcpp::sleep_for(500ms);
+                    }
+                }
+        }
+        bool Send_request_SC(const auto request){
+            using ServiceResponseFuture = rclcpp::Client<std_srvs::srv::SetBool>::SharedFuture;
+            auto response_received_callback = [this](ServiceResponseFuture future) {
+                auto response = future.get();
+                request_returned_time_sc = this->get_clock()->now().seconds();
+                if (response->success){
+//                    RCLCPP_INFO(this->get_logger(), "DONE"); // Change this to your response field
+                    }
+                service_result_sc_=response->success;
+                request_returned_time_sc = this->get_clock()->now().seconds();
+
+            };
+            request_sent_time = this->get_clock()->now().seconds();
+            RCLCPP_INFO(this->get_logger(),"Sending SC1");
+            auto future1 = sc1_client_->async_send_request(request, response_received_callback);
+            RCLCPP_INFO(this->get_logger(),"Sending SC2");
+            auto future2 = sc2_client_->async_send_request(request, response_received_callback);
+            RCLCPP_INFO(this->get_logger(),"Sending SC3");
+            auto future3 = sc3_client_->async_send_request(request, response_received_callback);
+            RCLCPP_INFO(this->get_logger(),"Sending SC4");
+            auto future4 = sc4_client_->async_send_request(request, response_received_callback);
+
+            return service_result_;
+
+        }
 
 
         rclcpp::Subscription<yolov8_msgs::msg::Ws>::SharedPtr Perception_sub_;//subscription to the perception node
@@ -771,12 +835,17 @@ class CnS_Task_SpotArm : public rclcpp::Node {
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr Cmd_sub_;// This (Cmd_sub_) is only for testing
         rclcpp::Node::SharedPtr ptr;
         rclcpp::Client<yolov8_msgs::srv::Move>::SharedPtr move_client_;
+        rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr sc1_client_;
+        rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr sc2_client_;
+        rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr sc3_client_;
+        rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr sc4_client_;
         std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
         std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
         geometry_msgs::msg::Point grip_pos;
         geometry_msgs::msg::Quaternion grip_orientation;
-        bool service_result_;
+        bool service_result_, service_result_sc_;
         double request_sent_time, request_returned_time ;
+        double request_sent_time_sc, request_returned_time_sc ;
         double TOF;
         rclcpp::CallbackGroup::SharedPtr client_cb_group_;
         rclcpp::CallbackGroup::SharedPtr member_cb_group_;
@@ -789,7 +858,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
 int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
- rclcpp::executors::MultiThreadedExecutor exe;
+  rclcpp::executors::MultiThreadedExecutor exe;
   CnS_Task_SpotArm::SharedPtr node = std::make_shared<CnS_Task_SpotArm>();
   exe.add_node(node);
   exe.spin();

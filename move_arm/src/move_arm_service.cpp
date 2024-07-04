@@ -124,7 +124,7 @@ class MoveSpotArm : public rclcpp::Node {
                     }
                 response->success = good;
                 return;
-                }//mode==2 trajectory
+                }//mode==2 trajectory TOFIX - proper trajectory 
             if (request->mode==3){ //Move cartesian to numeric pose
                 RCLCPP_INFO(this->get_logger(), "Moving to joint positions");
                 //Define the move group

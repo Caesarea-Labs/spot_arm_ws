@@ -119,6 +119,7 @@ ament_target_dependencies(cns_task
 	yolov8_msgs
 	moveit_msgs
 	sensor_msgs
+	std_srvs
 	tf2
 	tf2_ros
 	geometry_msgs)
