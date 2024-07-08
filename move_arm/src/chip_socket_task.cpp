@@ -94,6 +94,9 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             // Creating the clients for link detacher--attacher
             attach_client_ = this->create_client<linkattacher_msgs::srv::AttachLink>("/ATTACHLINK", rmw_qos_profile_services_default, client_cb_group_);
             detach_client_ = this->create_client<linkattacher_msgs::srv::DetachLink>("/DETACHLINK", rmw_qos_profile_services_default, client_cb_group_);
+            // The publisher for the save node
+            Img_save_pub_ = this->create_publisher<std_msgs::msg::String>("/cmd_save", 10);
+
 
 
 //            MoveGroupInterface arm_g = MoveGroupInterface(ptr, "spot_arm");
@@ -161,12 +164,13 @@ class CnS_Task_SpotArm : public rclcpp::Node {
 
 
             socket.world_detected=false;
-            RCLCPP_INFO(this->get_logger(),"Start scan for chip phaze");
+            RCLCPP_INFO(this->get_logger(),"Start scan for socket phaze");
             Scan_WS(2);
             RCLCPP_INFO(this->get_logger(),"End scan for socket phaze");
             RCLCPP_INFO(this->get_logger(),"Move to socket");
             Move_2_element(2);
-//            Align_orientation(2);
+     //       Generate_images("C04_02_");
+            Align_orientation(2);
             Save_Pos(2);
             Move_2_Pos(1);
             RCLCPP_INFO(this->get_logger(),"Activating the SC");
@@ -181,6 +185,57 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             DeActivate_SC();
             Move_2_joints(1);
 
+
+        }
+        void Generate_images(const std::string str){
+            Get_grip_pos();
+            auto request = std::make_shared<yolov8_msgs::srv::Move::Request>();
+            request->group = "spot_arm";
+            request->mode =1;
+            request->pose_t.position.x = grip_pos.x ;
+            request->pose_t.position.y = grip_pos.y;
+            request->pose_t.position.z = grip_pos.z; //First number in the correction TOF sensor->end_gripper
+            auto grip_orientation_t = grip_orientation;
+            tf2::Quaternion q_orig, q_rot, q_new;
+            tf2::convert(grip_orientation_t, q_orig);
+            q_rot.setRPY(0.0, 0.0,-0.5*3.14159);
+            q_new = q_rot * q_orig;
+            q_new.normalize();
+            grip_orientation_t = tf2::toMsg(q_new);
+
+            request->pose_t.orientation = grip_orientation_t;
+            RCLCPP_INFO(this->get_logger(),"Sending initial  griper pose");
+            bool good=false;
+            while (!good){
+                good = Send_request(request);
+                while(request_sent_time>=request_returned_time){
+                    rclcpp::sleep_for(500ms);
+                    }
+                }
+            auto message = std_msgs::msg::String();
+
+            //Creating the sequence
+            for(int i=1;i<30;i++){
+                Get_grip_pos();
+                grip_orientation_t = grip_orientation;
+                tf2::convert(grip_orientation_t, q_orig);
+                q_rot.setRPY(0.0, 0.0,3.1/30);
+                q_new = q_rot * q_orig;
+                q_new.normalize();
+                grip_orientation_t = tf2::toMsg(q_new);
+                request->pose_t.orientation = grip_orientation_t;
+                RCLCPP_INFO(this->get_logger(),"Sending %d pos",i);
+                good=false;
+                while (!good){
+                    good = Send_request(request);
+                    while(request_sent_time>=request_returned_time){
+                        rclcpp::sleep_for(500ms);
+                    }
+                }
+                message.data = str + std::to_string(i);
+                Img_save_pub_->publish(message);
+
+            }
 
         }
         void Start_up(){
@@ -651,7 +706,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             request->mode =1;
             request->pose_t.position.x = x ;
             request->pose_t.position.y = y;
-            request->pose_t.position.z = z + 0.3 ;//First number in the correction TOF sensor->end_gripper
+            request->pose_t.position.z = z + 0.4 ;//First number in the correction TOF sensor->end_gripper
             request->pose_t.orientation = grip_orientation_t;
             RCLCPP_INFO(this->get_logger(),"Aligning griper with element");
             good=false;
@@ -911,6 +966,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
         rclcpp::Subscription<yolov8_msgs::msg::Ws>::SharedPtr Perception_sub_;//subscription to the perception node
         rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr Joints_sub_;//subscription to the perception node
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr Cmd_sub_;// This (Cmd_sub_) is only for testing
+        rclcpp::Publisher<std_msgs::msg::String>::SharedPtr Img_save_pub_;// This (save_sub_) is only for the data collection
         rclcpp::Node::SharedPtr ptr;
         rclcpp::Client<yolov8_msgs::srv::Move>::SharedPtr move_client_;
         rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr sc1_client_;

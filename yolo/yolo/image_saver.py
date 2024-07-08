@@ -82,7 +82,7 @@ class Camera_subscriber(Node):
         # Displaying the image
         # model_file_detection = os.path.join(get_package_share_directory('yolo'),'models','best_detect.onnx')
         # self.model_detection = YOLO(model_file_detection,task='detect')
-        model_file_pose = os.path.join(get_package_share_directory('yolo'), 'models', 'best_C.onnx')
+        model_file_pose = os.path.join(get_package_share_directory('yolo'), 'models', 'best_5.onnx')
         self.model_pose = YOLO(model_file_pose,task='pose')
         self.yolov8_inference = Yolov8Inference()
         self.poseinference = Poseinference()
