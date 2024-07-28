@@ -103,12 +103,12 @@ def generate_launch_description():
                         executable='spawn_entity.py',
                         name="spawn_sdf_entity",
                         arguments=['-entity', 'Chip', '-file',sdf_model,
-                                   '-x', str(random.gauss(0,0.1)),
-                                   '-y', str(random.gauss(0,0.1)),
+                                   '-x', str(random.gauss(-0.1,0.05)),
+                                   '-y', str(random.gauss(0.2,0.05)),
                                    '-z', '0.71',
                                    '-R', '0.0',
                                    '-P', '0.0',
-                                   '-Y', str(random.uniform(-0.2,0))
+                                   '-Y', str(random.gauss(1.57,0.3))
                                    ], output='screen')
     table_model = os.path.join(get_package_share_directory('spot_arm_gazebo'),
                              'models', 'table',

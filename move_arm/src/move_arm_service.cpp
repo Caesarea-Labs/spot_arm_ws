@@ -136,12 +136,14 @@ class MoveSpotArm : public rclcpp::Node {
                 std::vector<double> joint_group_positions;
 //                current_state->copyJointGroupPositions(joint_model_group, joint_group_positions);
 
-//                if(request->group.c_str() == "spot_arm"){
+                if(request->group.c_str() == "spot_arm"){
                     for(int i=0; i<6; i++){
                         joint_group_positions.push_back(request->joint[i]);
                         RCLCPP_INFO(this->get_logger(),"Setting Joint %d pos %f",i,request->joint[i]);
                     }
-//                }
+                } else{
+                    joint_group_positions.push_back(request->joint[0]);
+                }
 
                 //change the joint positions
                 RCLCPP_INFO(this->get_logger(),"Setting the joint positions");

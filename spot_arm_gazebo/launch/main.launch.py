@@ -34,6 +34,29 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(os.path.join(moveit_config_dir, 'launch', 'demo.launch.py')),
             # launch_arguments={'use_sim_time': LaunchConfiguration('use_sim_time')}.items()
         )
+    fix_socket = ExecuteProcess(
+        cmd=['ros2', 'service', 'call', '/ATTACHLINK', 'linkattacher_msgs/srv/AttachLink',"{model1_name: 'Table', link1_name: 'link', model2_name: 'socket', link2_name: 'pcb'}"],
+        output='screen'
+    )
+
+    detach_socket = ExecuteProcess(
+        cmd=['ros2', 'service', 'call', '/DETACHLINK', 'linkattacher_msgs/srv/AttachLink',
+             "{model1_name: 'Table', link1_name: 'link', model2_name: 'socket', link2_name: 'pcb'}"],
+        output='screen'
+    )
+
+    fix_spot = ExecuteProcess(
+        cmd=['ros2', 'service', 'call', '/ATTACHLINK', 'linkattacher_msgs/srv/AttachLink',
+             "{model1_name: 'Table', link1_name: 'link', model2_name: 'spot', link2_name: 'body'}"],
+        output='screen'
+    )
+
+    detach_spot = ExecuteProcess(
+        cmd=['ros2', 'service', 'call', '/DETACHLINK', 'linkattacher_msgs/srv/AttachLink',
+             "{model1_name: 'Table', link1_name: 'link', model2_name: 'spot', link2_name: 'body'}"],
+        output='screen'
+    )
+
     kill_rviz = ExecuteProcess(
         cmd=['killall', '-9', 'rviz2'],
         output='screen'
@@ -48,11 +71,17 @@ def generate_launch_description():
         output='screen'
     )
 
+    sleep15 = ExecuteProcess(
+        cmd=['sleep', '15'],
+        output='screen'
+    )
+
     return LaunchDescription([
 
         gazebo_launch,
         sleep5,
         sleep10,
+        sleep15,
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=sleep5,
@@ -69,6 +98,12 @@ def generate_launch_description():
             event_handler=OnProcessExit(
                 target_action=sleep10,
                 on_exit=[kill_rviz],
+            )
+        ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=sleep15,
+                on_exit=[fix_spot , fix_socket],
             )
         ),
 

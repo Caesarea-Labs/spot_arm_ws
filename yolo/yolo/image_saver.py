@@ -17,6 +17,8 @@ from yolov8_msgs.msg import Poseinference
 from yolov8_msgs.msg import Ws
 from sensor_msgs.msg import PointCloud
 import numpy as np
+import onnxruntime as ort
+
 
 
 
@@ -84,6 +86,7 @@ class Camera_subscriber(Node):
         # self.model_detection = YOLO(model_file_detection,task='detect')
         model_file_pose = os.path.join(get_package_share_directory('yolo'), 'models', 'best_5.onnx')
         self.model_pose = YOLO(model_file_pose,task='pose')
+        # self.model_pose = ort.InferenceSession(model_file_pose,task='pose', providers=["CPUExecutionProvider"])
         self.yolov8_inference = Yolov8Inference()
         self.poseinference = Poseinference()
         print("YOLO pose model loaded")
@@ -152,7 +155,7 @@ class Camera_subscriber(Node):
         self.socket.undetected()
 
         for c in range(len(results_pose[0].boxes.cls)):
-            name = results_pose[0].names[int(results_pose[0].boxes.cls[c].numpy())]
+            name = results_pose[0].cpu().names[int(results_pose[0].boxes.cls[c].numpy())]
             box = results_pose[0].boxes.xyxy[c,:].to('cpu').detach().numpy().copy().astype(int)
             cx=(box[0]+box[2])/2
             cy=(box[1]+box[3])/2

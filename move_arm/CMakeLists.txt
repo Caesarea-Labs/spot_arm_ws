@@ -21,6 +21,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(linkattacher_msgs REQUIRED)
+find_package(ros2_linkattacher REQUIRED)
 
 
 if(BUILD_TESTING)
@@ -124,7 +125,8 @@ ament_target_dependencies(cns_task
 	tf2
 	tf2_ros
 	geometry_msgs
-	linkattacher_msgs)
+	linkattacher_msgs
+	ros2_linkattacher)
 
 
 

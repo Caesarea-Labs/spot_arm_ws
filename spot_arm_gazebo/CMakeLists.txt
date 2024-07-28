@@ -11,6 +11,8 @@ find_package(rclpy REQUIRED)
 find_package(gazebo_ros REQUIRED)
 find_package(spot_description REQUIRED)
 find_package(test_bench_description REQUIRED)
+find_package(ros2_linkattacher REQUIRED)
+find_package(linkattacher_msgs REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
