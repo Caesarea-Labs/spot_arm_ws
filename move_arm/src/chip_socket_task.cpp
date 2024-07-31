@@ -100,6 +100,8 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             grip_f = false;
             grip_l = false;
             grip_r = false;
+            Print_status();
+            Print_menu();
 
 
 
@@ -152,85 +154,68 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             grip_orientation = transform_stamped.transform.rotation;
         }
         void Move_cmd(const std_msgs::msg::String::SharedPtr data) {
-            RCLCPP_INFO(this->get_logger(),"Pose: %s", data->data.c_str());
-            // START UP
-            RCLCPP_INFO(this->get_logger(),"Starting the Start up process");
-            Start_up();
-            //Scan for the chip
-            bool chip_d = Chip_scan();
-            //Scan for the socket
-            bool socket_d = Socket_scan();
-            //Close socket
-            Close_Socket_Stage();
-            Close_Socket_Stage();
-            //Open Socket
-            Open_Socket_Stage();
-            Open_Socket_Stage();
-            //Pick
-            Pick_chip();
-            //Move to the Socket
-            Move_2_Pos(2);
-            //Release the chip
-            Releas_chip();
-            RCLCPP_INFO(this->get_logger(),"CHIP IN SOCKET");
-            Detach_chip();
-            Close_Socket_Chip_Stage();
-            Go_Home();
-
-
-
-
-            /*
-            //Pick up the chip
-            Move_2_Pos(1);
-            Pick_chip();
-//            RCLCPP_INFO(this->get_logger(),"Activating the SC");
-
-            RCLCPP_INFO(this->get_logger(),"Moving to pose 2");
-            Move_2_Pos(2);
-            RCLCPP_INFO(this->get_logger(),"Activating the SC");
-            //Release the chip
-            Releas_chip();
-            RCLCPP_INFO(this->get_logger(),"CHIP IN SOCKET");
-
-            //Closing the socket
-            RCLCPP_INFO(this->get_logger(),"Closing the socket");
-            Move_2_element(2,0.5);
-            Operate_griper(-0.03,0.03);
-//            Scan_WS(2);
-//            Move_2_element(2,0.5);
-//            Align_orientation(2);
-
-            offset = -0.02;
-            while(socket.state){
-                RCLCPP_INFO(this->get_logger(),"Moving to base position over socket");
-
-//                Save_Pos(2);
-                Close_socket(offset);
-
-                offset+=0.001;
-                Move_2_element(2,0.5);
-                Operate_griper(-0.03,0.03);
-                Scan_WS(2);
-                Move_2_element(2,0.5);
-//                Align_orientation(2);
-                if(socket.state){
-                    RCLCPP_INFO(this->get_logger(),"Socket is open");
-                    RCLCPP_INFO(this->get_logger(),"offset distance is %f",offset);
-                    }
-                else{
-                    RCLCPP_INFO(this->get_logger(),"Socket is closed");
-                    RCLCPP_INFO(this->get_logger(),"offset distance is %f",offset);
-                }
-//
+            int mode = stoi(data->data);
+//            RCLCPP_INFO(this->get_logger(),"mode %d selected",mode);
+            if(mode==0){
+                Print_status();
+                Print_menu();
             }
-            Detach_chip();
-            */
+            else if (mode==1){
+                RCLCPP_INFO(this->get_logger(),"Starting the Start up process");
+                Start_up();
+            }
+            else if (mode==2){
+                RCLCPP_INFO(this->get_logger(),"Scanning the workspace");
+                bool chip_d = Chip_scan();
+                //Scan for the socket
+                bool socket_d = Socket_scan();
+                Go_Home();
+            }else if(mode==3){
+                RCLCPP_INFO(this->get_logger(),"Opening the socket");
+                Open_Socket_Stage();
+                //Pick
+                RCLCPP_INFO(this->get_logger(),"Pick the chip");
+                Pick_chip();
+                //Move to the Socket
+                RCLCPP_INFO(this->get_logger(),"Move to socket");
+                Move_2_Pos(2);
+                //Release the chip
+                RCLCPP_INFO(this->get_logger(),"Setting chip into socket");
+                Releas_chip();
+                //Closing the socket
+                RCLCPP_INFO(this->get_logger(),"Closing the socket");
+                Detach_chip();
+                Close_Socket_Chip_Stage();
+                RCLCPP_INFO(this->get_logger(),"Returning to home position");
+                Go_Home();
 
+            }
 
-            //
+        }
+        void Print_menu(){
+            RCLCPP_INFO(this->get_logger(),"0 - Print status an menu");
+            RCLCPP_INFO(this->get_logger(),"1 - Start up motion controllers");
+            RCLCPP_INFO(this->get_logger(),"2 - Scan workspace");
+            RCLCPP_INFO(this->get_logger(),"3 - Load chip to socket");
 
-
+        }
+        void Print_status(){
+            //start up
+            if (spot_arm & grip_f & grip_l & grip_r){
+                RCLCPP_INFO(this->get_logger(),"All controller loaded, ready to start working.");
+            }else{
+                RCLCPP_INFO(this->get_logger(),"Controller not loaded, start the startup process.");
+            }
+            //Scan workspace
+            if(chip.world_detected & socket.world_detected){
+                RCLCPP_INFO(this->get_logger(),"All elements in workspace are detected");
+            }else if(!chip.world_detected & socket.world_detected) {
+                RCLCPP_INFO(this->get_logger(),"Chip not detected");
+            }else if(chip.world_detected & !socket.world_detected) {
+                RCLCPP_INFO(this->get_logger(),"Socket not detected");
+            }else {
+                RCLCPP_INFO(this->get_logger(),"No items detected");
+            }
         }
         void Go_Home(){
             auto request = std::make_shared<yolov8_msgs::srv::Move::Request>();
@@ -548,7 +533,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             request->pose_t.position.y = grip_pos.y;
             request->pose_t.position.z = grip_pos.z;
             request->pose_t.orientation = grip_orientation_t;
-            RCLCPP_INFO(this->get_logger(),"Defined new position -Left");
+//            RCLCPP_INFO(this->get_logger(),"Defined new position -Left");
             good=false;
             while (!good){
                 good = Send_request(request);
@@ -583,7 +568,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             grip_orientation_t = tf2::toMsg(q_new);
             request->mode =1;
             request->pose_t.orientation = grip_orientation_t;
-            RCLCPP_INFO(this->get_logger(),"Defined new position -Left Up");
+//            RCLCPP_INFO(this->get_logger(),"Defined new position -Left Up");
             good=false;
             while (!good){
                 good = Send_request(request);
@@ -618,7 +603,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             grip_orientation_t = tf2::toMsg(q_new);
             request->mode=1;
             request->pose_t.orientation = grip_orientation_t;
-            RCLCPP_INFO(this->get_logger(),"Defined new position -Right");
+//            RCLCPP_INFO(this->get_logger(),"Defined new position -Right");
             good=false;
             while (!good){
                 good = Send_request(request);
@@ -652,7 +637,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             grip_orientation_t = tf2::toMsg(q_new);
             request->mode=1;
             request->pose_t.orientation = grip_orientation_t;
-            RCLCPP_INFO(this->get_logger(),"Defined new position -Right");
+//            RCLCPP_INFO(this->get_logger(),"Defined new position -Right");
             good=false;
             while (!good){
                 good = Send_request(request);
@@ -668,7 +653,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
 
             request->pose_name=base_pose;
             request->mode=0;
-            RCLCPP_INFO(this->get_logger(),"Defined new position -Base");
+//            RCLCPP_INFO(this->get_logger(),"Defined new position -Base");
             good=false;
             while (!good){
                 good = Send_request(request);
@@ -721,7 +706,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
                 while(!cali){
 
                 if(element==1 & chip.detected){
-                    RCLCPP_INFO(this->get_logger(),"Correcting chip x");
+//                    RCLCPP_INFO(this->get_logger(),"Correcting chip x");
                     chip.detected =false;
                     ang_x= (chip.x_pic -960) * 1.089 / 1920;
                     ang_y= (chip.y_pic -540) * 1.089 / 1920;
@@ -748,7 +733,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
                 request->pose_t.orientation = grip_orientation_t;
 
                 if(element==1 & chip.detected){
-                    RCLCPP_INFO(this->get_logger(),"Correcting chip y");
+//                    RCLCPP_INFO(this->get_logger(),"Correcting chip y");
                     chip.detected =false;
                     ang_x= (chip.x_pic -960) * 1.089 / 1920;
                     ang_y= (chip.y_pic -540) * 1.089 / 1920;
@@ -773,7 +758,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
                 ang_y= (chip.y_pic -540) * 1.089 / 1920;
                 if(abs(ang_x)<0.02 & abs(ang_y)<0.02){
                 cali=true;
-                RCLCPP_INFO(this->get_logger(),"TOF= %2f",TOF);
+//                RCLCPP_INFO(this->get_logger(),"TOF= %2f",TOF);
                 v2chip_pic.setX(TOF+ 0.11778 + 0.151);
                 v2chip_pic.setY(0);
                 v2chip_pic.setZ(0+0.02);
@@ -802,7 +787,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
                 while(!cali){
 
                 if(element==2 & socket.detected){
-                    RCLCPP_INFO(this->get_logger(),"Correcting socket x");
+//                    RCLCPP_INFO(this->get_logger(),"Correcting socket x");
                     socket.detected =false;
                     ang_x= (socket.x_pic -960) * 1.089 / 1920;
                     ang_y= (socket.y_pic -540) * 1.089 / 1920;
@@ -829,7 +814,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
                 request->pose_t.orientation = grip_orientation_t;
 
                 if(element==2 & socket.detected){
-                    RCLCPP_INFO(this->get_logger(),"Correcting socket y");
+//                    RCLCPP_INFO(this->get_logger(),"Correcting socket y");
                     socket.detected =false;
                     ang_x= (socket.x_pic -960) * 1.089 / 1920;
                     ang_y= (socket.y_pic -540) * 1.089 / 1920;
@@ -854,7 +839,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
                 ang_y= (socket.y_pic -540) * 1.089 / 1920;
                 if(abs(ang_x)<0.02 & abs(ang_y)<0.02){
                 cali=true;
-                RCLCPP_INFO(this->get_logger(),"TOF= %2f",TOF);
+//                RCLCPP_INFO(this->get_logger(),"TOF= %2f",TOF);
                 v2chip_pic.setX(TOF+ 0.11778 + 0.151);
                 v2chip_pic.setY(0);
                 v2chip_pic.setZ(0+0.02);
@@ -904,7 +889,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             request->pose_t.position.y = y;
             request->pose_t.position.z = z + h ;//First number in the correction TOF sensor->end_gripper
             request->pose_t.orientation = grip_orientation_t;
-            RCLCPP_INFO(this->get_logger(),"Aligning griper with element");
+//            RCLCPP_INFO(this->get_logger(),"Aligning griper with element");
             good=false;
             while (!good){
                 good = Send_request(request);
@@ -939,7 +924,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             auto grip_orientation_t = grip_orientation;
             tf2::Quaternion q_orig, q_rot, q_new;
             tf2::convert(grip_orientation_t, q_orig);
-            RCLCPP_INFO(this->get_logger(),"Theta angel is %2f",theta);
+//            RCLCPP_INFO(this->get_logger(),"Theta angel is %2f",theta);
             q_rot.setRPY(0.0, 0.0, theta);//Define the needed rotation to allign with element
             q_new = q_rot * q_orig; //Computing the new orientation
             q_new.normalize();
@@ -960,7 +945,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
                     }
                 }
             rclcpp::sleep_for(1000ms);
-            RCLCPP_INFO(this->get_logger(),"New detection");
+//            RCLCPP_INFO(this->get_logger(),"New detection");
 
              if(element==1){
                 theta = atan2(chip.key_points[1][1] - chip.key_points[1][0], chip.key_points[0][1] - chip.key_points[0][0]);
@@ -968,7 +953,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
                 theta = atan2(socket.key_points[1][1] - socket.key_points[1][0], socket.key_points[0][1] - socket.key_points[0][0]);
             }
             theta -= 3.14159/2;
-            RCLCPP_INFO(this->get_logger(),"The corrected angle is %f",theta);
+//            RCLCPP_INFO(this->get_logger(),"The corrected angle is %f",theta);
             if (abs(theta)>0.03){
                 Align_orientation(element);
                 }
@@ -981,14 +966,14 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             if(element==1){//chip
                 for(int i=0; i<9; i++){
                     chip.joints_pos[i]=joints[i];
-                    RCLCPP_INFO(this->get_logger(),"Joint %d pos %f",i,chip.joints_pos[i]);
+//                    RCLCPP_INFO(this->get_logger(),"Joint %d pos %f",i,chip.joints_pos[i]);
                 }
             }else if(element==2){
                 for(int i=0; i<9;i++){
                     socket.joints_pos[i]=joints[i];
                 }
                 }
-                RCLCPP_INFO(this->get_logger(),"Position saved");
+//                RCLCPP_INFO(this->get_logger(),"Position saved");
             }
         void Save_Pos(const int element){
             Get_grip_pos();
@@ -999,7 +984,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
                 socket.grip_pos = grip_pos;
                 socket.grip_orientation = grip_orientation;
                 }
-                RCLCPP_INFO(this->get_logger(),"Position saved");
+//                RCLCPP_INFO(this->get_logger(),"Position saved");
             }
         void Move_2_joints(const int element){
             auto request = std::make_shared<yolov8_msgs::srv::Move::Request>();
@@ -1014,7 +999,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
                     request->joint[i]=socket.joints_pos[i];
                     }
                 }
-            RCLCPP_INFO(this->get_logger(),"Sending Joint request");
+//            RCLCPP_INFO(this->get_logger(),"Sending Joint request");
             bool good=false;
             while (!good){
                 good = Send_request(request);
@@ -1077,13 +1062,13 @@ class CnS_Task_SpotArm : public rclcpp::Node {
 
             };
             request_sent_time = this->get_clock()->now().seconds();
-            RCLCPP_INFO(this->get_logger(),"Sending SC1");
+//            RCLCPP_INFO(this->get_logger(),"Sending SC1");
             auto future1 = sc1_client_->async_send_request(request, response_received_callback);
-            RCLCPP_INFO(this->get_logger(),"Sending SC2");
+//            RCLCPP_INFO(this->get_logger(),"Sending SC2");
             auto future2 = sc2_client_->async_send_request(request, response_received_callback);
-            RCLCPP_INFO(this->get_logger(),"Sending SC3");
+//            RCLCPP_INFO(this->get_logger(),"Sending SC3");
             auto future3 = sc3_client_->async_send_request(request, response_received_callback);
-            RCLCPP_INFO(this->get_logger(),"Sending SC4");
+//            RCLCPP_INFO(this->get_logger(),"Sending SC4");
             auto future4 = sc4_client_->async_send_request(request, response_received_callback);
 
             return service_result_;
@@ -1131,7 +1116,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
 
             };
             request_sent_time_at = this->get_clock()->now().seconds();
-            RCLCPP_INFO(this->get_logger(),"Sending Attach");
+//            RCLCPP_INFO(this->get_logger(),"Sending Attach");
             auto future = attach_client_->async_send_request(request, response_received_callback);
 
 
@@ -1166,7 +1151,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
 
             };
             request_sent_time_at = this->get_clock()->now().seconds();
-            RCLCPP_INFO(this->get_logger(),"Sending Detach");
+//            RCLCPP_INFO(this->get_logger(),"Sending Detach");
             auto future = detach_client_->async_send_request(request, response_received_callback);
 
 
@@ -1180,7 +1165,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             while(TOF>delta){
                 rclcpp::sleep_for(200ms);
                 Get_grip_pos();
-                RCLCPP_INFO(this->get_logger(),"TOF = %f",TOF);
+//                RCLCPP_INFO(this->get_logger(),"TOF = %f",TOF);
                 Move_direction(0,0,-0.5*(TOF-delta));
             }
             Activate_SC(); // Activate the suction cups
@@ -1207,7 +1192,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             while(TOF>delta){
                 rclcpp::sleep_for(200ms);
                 Get_grip_pos();
-                RCLCPP_INFO(this->get_logger(),"TOF = %f",TOF);
+//                RCLCPP_INFO(this->get_logger(),"TOF = %f",TOF);
                 Move_direction(0,0,-0.5*(TOF-delta));
             }
             Detach();
@@ -1267,7 +1252,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             while(TOF>delta){
                 rclcpp::sleep_for(200ms);
                 Get_grip_pos();
-                RCLCPP_INFO(this->get_logger(),"TOF = %f",TOF);
+//                RCLCPP_INFO(this->get_logger(),"TOF = %f",TOF);
                 Move_direction(0,0,-0.5*(TOF-0.8*delta));
             }
 
@@ -1374,7 +1359,7 @@ class CnS_Task_SpotArm : public rclcpp::Node {
             while(TOF>delta){
                 rclcpp::sleep_for(200ms);
                 Get_grip_pos();
-                RCLCPP_INFO(this->get_logger(),"TOF = %f",TOF);
+//                RCLCPP_INFO(this->get_logger(),"TOF = %f",TOF);
                 Move_direction(0,0,-0.5*(TOF-0.8*delta));
             }
             v1.setX(0);

@@ -1,9 +1,10 @@
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription, ExecuteProcess, RegisterEventHandler
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.actions import SetLaunchConfiguration
+from launch.actions import DeclareLaunchArgument, SetLaunchConfiguration
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from launch.conditions import IfCondition
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch.event_handlers import (OnExecutionComplete, OnProcessExit,
@@ -11,6 +12,21 @@ from launch.event_handlers import (OnExecutionComplete, OnProcessExit,
 
 def generate_launch_description():
     # Get the directory of the package containing the launch files
+    close_rviz = LaunchConfiguration('close_rviz')
+    show_detection_flag = LaunchConfiguration('show_detection')
+
+    kill_rviz_launch_arg = DeclareLaunchArgument(
+        'close_rviz',
+        default_value='true',
+        description='Flag to kill rviz'
+    )
+
+    show_detection_launch_arg = DeclareLaunchArgument(
+        'show_detection_flag',
+        default_value='true',
+        description='Flag to show detection results'
+    )
+
     gazebo_dir = get_package_share_directory('spot_arm_gazebo')
     moveit_config_dir = get_package_share_directory('arm_moveit_config')
     move_service_node = Node(
@@ -59,6 +75,13 @@ def generate_launch_description():
 
     kill_rviz = ExecuteProcess(
         cmd=['killall', '-9', 'rviz2'],
+        condition = IfCondition(close_rviz),
+        output='screen'
+    )
+
+    show_detection = ExecuteProcess(
+        cmd=['ros2', 'run', 'image_tools', 'showimage', '--ros-args', '--remap', '/image:=/detection_results'],
+        condition = IfCondition(show_detection_flag),
         output='screen'
     )
 
@@ -75,13 +98,19 @@ def generate_launch_description():
         cmd=['sleep', '15'],
         output='screen'
     )
+    sleep25 = ExecuteProcess(
+        cmd=['sleep', '25'],
+        output='screen'
+    )
 
     return LaunchDescription([
-
+        kill_rviz_launch_arg,
+        show_detection_launch_arg,
         gazebo_launch,
         sleep5,
         sleep10,
         sleep15,
+        sleep25,
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=sleep5,
@@ -94,6 +123,7 @@ def generate_launch_description():
                 on_exit=[move_service_node, yolo_node],
             )
         ),
+
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=sleep10,
@@ -104,6 +134,12 @@ def generate_launch_description():
             event_handler=OnProcessExit(
                 target_action=sleep15,
                 on_exit=[fix_spot , fix_socket],
+            )
+        ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=sleep25,
+                on_exit=[show_detection],
             )
         ),
 

@@ -1,0 +1,19 @@
+main file to run the simulation: (Terminal 1)
+
+ros2 launch  spot_arm_gazebo main.launch.py show_detection:='true' close_rviz:='false'
+
+Running the task node:(Terminal 2)
+
+ros2 run move_arm cns_task
+
+Executing the commands:(Terminal 3)
+
+ ros2 topic pub /test_cmd std_msgs/msg/String "{data: "3"}" -1
+ The commands should be run in accordance to the menu printout in the task node (sending "0" will print the menu).
+
+
+ Additional options:
+ Setting show_detection:='false' will disable the detection results output which can be run
+ seperatly in an additional consol via the command
+
+ros2 run image_tools showimage --ros-args --remap /image:=/detection_results
