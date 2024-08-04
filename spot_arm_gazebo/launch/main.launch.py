@@ -41,6 +41,13 @@ def generate_launch_description():
         name='move_service_node',
         output='screen'
     )
+    webcom_node = Node(
+        package='websoc_com',
+        executable='web_com',
+        name='websocket_node',
+        output='screen'
+    )
+
     SetLaunchConfiguration('use_sim_time', 'true')
     gazebo_launch = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(gazebo_dir, 'launch', 'gazebo.launch.py')),
@@ -120,7 +127,7 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=sleep10,
-                on_exit=[move_service_node, yolo_node],
+                on_exit=[move_service_node, yolo_node, webcom_node],
             )
         ),
 
